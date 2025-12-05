@@ -9,4 +9,10 @@ const StockSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now }
 });
 
+// Add indexes for better query performance
+StockSchema.index({ itemName: 1 });
+StockSchema.index({ category: 1 });
+StockSchema.index({ quantity: 1 });
+StockSchema.index({ updatedAt: -1 });
+
 export default mongoose.models.Stock || mongoose.model('Stock', StockSchema);

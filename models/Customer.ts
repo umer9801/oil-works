@@ -8,4 +8,10 @@ const CustomerSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, expires: 2592000 } // 30 days
 });
 
+// Add indexes for better query performance
+CustomerSchema.index({ name: 1 });
+CustomerSchema.index({ phone: 1 });
+CustomerSchema.index({ vehicleNo: 1 });
+CustomerSchema.index({ createdAt: -1 });
+
 export default mongoose.models.Customer || mongoose.model('Customer', CustomerSchema);

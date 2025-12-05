@@ -25,4 +25,11 @@ const ReceiptSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now, expires: 2592000 }
 });
 
+// Add indexes for better query performance
+ReceiptSchema.index({ customerId: 1 });
+ReceiptSchema.index({ customerName: 1 });
+ReceiptSchema.index({ customerPhone: 1 });
+ReceiptSchema.index({ vehicleNo: 1 });
+ReceiptSchema.index({ createdAt: -1 });
+
 export default mongoose.models.Receipt || mongoose.model('Receipt', ReceiptSchema);

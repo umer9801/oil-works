@@ -2,12 +2,18 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Toast from '@/components/Toast';
 
-// Prevent SSR issues
-const isBrowser = typeof window !== 'undefined';
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
 export default function AddCustomer() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -17,6 +23,7 @@ export default function AddCustomer() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const res = await fetch('/api/customers', {
         method: 'POST',
@@ -26,20 +33,33 @@ export default function AddCustomer() {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        alert('Customer added successfully!');
-        router.push('/customers');
+        showToast('Customer added successfully!', 'success');
+        setTimeout(() => router.push('/customers'), 1000);
       } else {
-        alert(data.error || 'Failed to add customer');
+        showToast(data.error || 'Failed to add customer', 'error');
       }
     } catch (error: any) {
-      console.error('Error adding customer:', error);
-      alert('Failed to add customer: ' + error.message);
+      showToast('Failed to add customer: ' + error.message, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ show: true, message, type });
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
+    <>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
+        <div className="max-w-2xl mx-auto">
         <Link href="/dashboard" className="text-white hover:text-gray-300 mb-6 inline-block">
           ← Back to Dashboard
         </Link>
@@ -94,13 +114,15 @@ export default function AddCustomer() {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              Add Customer
+              {loading ? 'Adding Customer...' : 'Add Customer'}
             </button>
           </form>
         </div>
       </div>
     </div>
+    </>
   );
 }

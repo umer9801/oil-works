@@ -2,14 +2,19 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import Toast from '@/components/Toast';
 
-// Prevent SSR issues
-const isBrowser = typeof window !== 'undefined';
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
 export default function Receipts() {
   const [receipts, setReceipts] = useState([]);
   const [filteredReceipts, setFilteredReceipts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
 
   useEffect(() => {
     fetchReceipts();
@@ -51,9 +56,34 @@ export default function Receipts() {
     setFilteredReceipts(filtered);
   };
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ show: true, message, type });
+  };
+
+  const handleDelete = async (id: string, customerName: string) => {
+    if (confirm(`Are you sure you want to delete receipt for ${customerName}?`)) {
+      try {
+        const res = await fetch(`/api/receipts?id=${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        
+        if (res.ok && data.success) {
+          showToast('Receipt deleted successfully!', 'success');
+          fetchReceipts();
+        } else {
+          showToast(data.error || 'Failed to delete receipt', 'error');
+        }
+      } catch (error: any) {
+        showToast('Failed to delete receipt: ' + error.message, 'error');
+      }
+    }
+  };
+
   const handleExportExcel = () => {
-    // Prepare data for Excel
-    const excelData = receipts.map((receipt: any) => ({
+    try {
+      // Prepare data for Excel
+      const excelData = receipts.map((receipt: any) => ({
       'Date': new Date(receipt.createdAt).toLocaleDateString(),
       'Customer Name': receipt.customerName || 'N/A',
       'Phone': receipt.customerPhone || 'N/A',
@@ -93,11 +123,23 @@ export default function Receipts() {
     
     // Download
     XLSX.writeFile(wb, filename);
+    showToast('Excel file downloaded successfully!', 'success');
+    } catch (error: any) {
+      showToast('Failed to export Excel: ' + error.message, 'error');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
         <Link href="/dashboard" className="text-white hover:text-gray-300 mb-6 inline-block">
           ← Back to Dashboard
         </Link>
@@ -150,6 +192,7 @@ export default function Receipts() {
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vehicle</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Items</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -172,6 +215,14 @@ export default function Receipts() {
                     </td>
                     <td className="px-4 py-3 text-sm font-bold text-green-600">
                       Rs. {receipt.totalAmount}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => handleDelete(receipt._id, receipt.customerName || 'Customer')}
+                        className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                      >
+                        🗑️ Delete
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -224,5 +275,6 @@ export default function Receipts() {
         </div>
       </div>
     </div>
+    </>
   );
 }

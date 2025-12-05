@@ -1,10 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-// Prevent SSR issues
-const isBrowser = typeof window !== 'undefined';
+import Toast from '@/components/Toast';
 
 interface ReceiptItem {
   itemId: string;
@@ -14,13 +11,19 @@ interface ReceiptItem {
   total: number;
 }
 
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
+
 export default function NewReceipt() {
-  const router = useRouter();
   const printRef = useRef<HTMLDivElement>(null);
   const [customers, setCustomers] = useState([]);
   const [stock, setStock] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [items, setItems] = useState<ReceiptItem[]>([]);
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
@@ -38,13 +41,17 @@ export default function NewReceipt() {
     fetchStock();
   }, []);
 
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ show: true, message, type });
+  };
+
   const fetchCustomers = async () => {
     try {
       const res = await fetch('/api/customers');
       const data = await res.json();
       setCustomers(Array.isArray(data) ? data : data.customers || []);
     } catch (error) {
-      console.error('Failed to fetch customers:', error);
+      showToast('Failed to fetch customers', 'error');
       setCustomers([]);
     }
   };
@@ -55,7 +62,7 @@ export default function NewReceipt() {
       const data = await res.json();
       setStock(Array.isArray(data) ? data : data.stock || []);
     } catch (error) {
-      console.error('Failed to fetch stock:', error);
+      showToast('Failed to fetch stock', 'error');
       setStock([]);
     }
   };
@@ -96,7 +103,7 @@ export default function NewReceipt() {
     // Check if item already exists
     const existingItem = items.find(item => item.itemId === stockId);
     if (existingItem) {
-      alert('Item already added! Update quantity if needed.');
+      showToast('Item already added! Update quantity if needed.', 'info');
       return;
     }
 
@@ -132,7 +139,7 @@ export default function NewReceipt() {
     e.preventDefault();
     
     if (items.length === 0) {
-      alert('Please add at least one item!');
+      showToast('Please add at least one item!', 'error');
       return;
     }
 
@@ -153,14 +160,13 @@ export default function NewReceipt() {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        alert('Receipt created successfully!');
-        handlePrint();
+        showToast('Receipt created successfully!', 'success');
+        setTimeout(() => handlePrint(), 500);
       } else {
-        alert(data.error || 'Failed to create receipt');
+        showToast(data.error || 'Failed to create receipt', 'error');
       }
     } catch (error: any) {
-      console.error('Error creating receipt:', error);
-      alert('Failed to create receipt: ' + error.message);
+      showToast('Failed to create receipt: ' + error.message, 'error');
     }
   };
 
@@ -169,8 +175,16 @@ export default function NewReceipt() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
         <Link href="/dashboard" className="text-white hover:text-gray-300 mb-6 inline-block no-print">
           ← Back to Dashboard
         </Link>
@@ -458,5 +472,6 @@ export default function NewReceipt() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -31,3 +31,19 @@ export async function POST(request: Request) {
     }, { status: 500 });
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    await Receipt.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: 'Receipt deleted successfully' });
+  } catch (error: any) {
+    console.error('Failed to delete receipt:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to delete receipt' 
+    }, { status: 500 });
+  }
+}

@@ -36,10 +36,34 @@ export async function PUT(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
-    const { id, quantity } = body;
-    const stock = await Stock.findByIdAndUpdate(id, { quantity, updatedAt: new Date() }, { new: true });
-    return NextResponse.json(stock);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to update stock' }, { status: 500 });
+    const { id, ...updateData } = body;
+    const stock = await Stock.findByIdAndUpdate(
+      id, 
+      { ...updateData, updatedAt: new Date() }, 
+      { new: true }
+    ).lean();
+    return NextResponse.json({ success: true, stock });
+  } catch (error: any) {
+    console.error('Failed to update stock:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to update stock' 
+    }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    await Stock.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: 'Stock deleted successfully' });
+  } catch (error: any) {
+    console.error('Failed to delete stock:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to delete stock' 
+    }, { status: 500 });
   }
 }

@@ -2,13 +2,18 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import Toast from '@/components/Toast';
 
-// Prevent SSR issues
-const isBrowser = typeof window !== 'undefined';
+interface ToastState {
+  show: boolean;
+  message: string;
+  type: 'success' | 'error' | 'info';
+}
 
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
   const [editForm, setEditForm] = useState({
     name: '',
     phone: '',
@@ -51,15 +56,14 @@ export default function Customers() {
       const data = await res.json();
       
       if (res.ok) {
-        alert('Customer updated successfully!');
+        showToast('Customer updated successfully!', 'success');
         setEditingId(null);
         fetchCustomers();
       } else {
-        alert(data.error || 'Failed to update customer');
+        showToast(data.error || 'Failed to update customer', 'error');
       }
     } catch (error: any) {
-      console.error('Error updating customer:', error);
-      alert('Failed to update customer: ' + error.message);
+      showToast('Failed to update customer: ' + error.message, 'error');
     }
   };
 
@@ -72,45 +76,61 @@ export default function Customers() {
         const data = await res.json();
         
         if (res.ok) {
-          alert('Customer deleted successfully!');
+          showToast('Customer deleted successfully!', 'success');
           fetchCustomers();
         } else {
-          alert(data.error || 'Failed to delete customer');
+          showToast(data.error || 'Failed to delete customer', 'error');
         }
       } catch (error: any) {
-        console.error('Error deleting customer:', error);
-        alert('Failed to delete customer: ' + error.message);
+        showToast('Failed to delete customer: ' + error.message, 'error');
       }
     }
   };
 
-  const handleExportExcel = () => {
-    // Prepare data for Excel
-    const excelData = customers.map((customer: any) => ({
-      'Name': customer.name,
-      'Phone': customer.phone,
-      'Vehicle Number': customer.vehicleNo,
-      'Model': customer.model,
-      'Date Added': new Date(customer.createdAt).toLocaleDateString()
-    }));
+  const showToast = (message: string, type: 'success' | 'error' | 'info') => {
+    setToast({ show: true, message, type });
+  };
 
-    // Create worksheet
-    const ws = XLSX.utils.json_to_sheet(excelData);
-    
-    // Create workbook
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Customers');
-    
-    // Generate filename with current date
-    const filename = `customers_${new Date().toISOString().split('T')[0]}.xlsx`;
-    
-    // Download
-    XLSX.writeFile(wb, filename);
+  const handleExportExcel = () => {
+    try {
+      // Prepare data for Excel
+      const excelData = customers.map((customer: any) => ({
+        'Name': customer.name,
+        'Phone': customer.phone,
+        'Vehicle Number': customer.vehicleNo,
+        'Model': customer.model,
+        'Date Added': new Date(customer.createdAt).toLocaleDateString()
+      }));
+
+      // Create worksheet
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      
+      // Create workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Customers');
+      
+      // Generate filename with current date
+      const filename = `customers_${new Date().toISOString().split('T')[0]}.xlsx`;
+      
+      // Download
+      XLSX.writeFile(wb, filename);
+      showToast('Excel file downloaded successfully!', 'success');
+    } catch (error: any) {
+      showToast('Failed to export Excel: ' + error.message, 'error');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <>
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast({ ...toast, show: false })}
+        />
+      )}
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
         <Link href="/dashboard" className="text-white hover:text-gray-300 mb-6 inline-block">
           ← Back to Dashboard
         </Link>
@@ -236,5 +256,6 @@ export default function Customers() {
         </div>
       </div>
     </div>
+    </>
   );
 }
