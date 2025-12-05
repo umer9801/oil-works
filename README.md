@@ -1,71 +1,32 @@
 # The Oil Works - POS System
 
-Oil changing shop ke liye complete Point of Sale system with mobile app support.
+Point of Sale system for oil changing shop.
 
 ## Features
 
-✅ **Customer Management** - Add aur view customers
-✅ **Stock Management** - Inventory tracking with low stock alerts (5 se kam)
-✅ **Receipt Generation** - Professional receipts with print support
-✅ **Data Storage** - MongoDB ke saath 30 days data retention
-✅ **Responsive UI** - Mobile aur laptop dono ke liye optimized
-✅ **PWA Support** - Phone pe app ki tarah install ho sakta hai
+- Customer Management
+- Stock Management with Low Stock Alerts
+- Receipt Generation & Printing
+- Excel Export (Customers & Receipts)
+- Login System
+- Responsive Design (Mobile & Desktop)
+- PWA Support
 
-## Setup Instructions
+## Setup
 
-### 1. MongoDB Setup
+1. Clone repository
+2. Install dependencies: `npm install`
+3. Add MongoDB URI in `.env.local`
+4. Run: `npm run dev`
 
-1. [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) pe free account banayein
-2. New cluster create karein (free tier)
-3. Database user create karein
-4. Connection string copy karein
-5. `.env.local` file mein paste karein:
+## Default Login
 
-```
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/oil-works?retryWrites=true&w=majority
-```
-
-### 2. Install Dependencies
-
-```bash
-npm install
-```
-
-### 3. Run Development Server
-
-```bash
-npm run dev
-```
-
-Browser mein open karein: `http://localhost:3000`
-
-### 4. Phone Pe Install Karne Ke Liye
-
-1. Mobile browser mein website open karein
-2. Browser menu mein "Add to Home Screen" option select karein
-3. App install ho jayega
-
-## Usage
-
-- **Home Page**: Main dashboard with all options
-- **Add Customer**: Naye customers register karein
-- **Manage Stock**: Inventory add/view karein, low stock alerts dekhein
-- **New Receipt**: Service receipt create aur print karein
-- **View Receipts**: Past receipts history
+- Username: `admin`
+- Password: `admin123`
 
 ## Tech Stack
 
-- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
-- **Database**: MongoDB with Mongoose
-- **PWA**: Progressive Web App support
-
-## Notes
-
-- Customer aur receipt data automatically 30 days baad delete ho jata hai
-- Stock 5 se kam hone pe red alert show hota hai
-- Receipt print ke liye browser ka print function use hota hai
-- Mobile aur desktop dono pe fully responsive
-
-## Contact
-
-For support: [Your Contact Info]
+- Next.js 15
+- MongoDB
+- TypeScript
+- Tailwind CSS
