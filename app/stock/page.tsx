@@ -8,6 +8,8 @@ export default function Stock() {
   const [formData, setFormData] = useState({
     itemName: '',
     quantity: 0,
+    costPrice: 0,
+    salePrice: 0,
     category: 'oil'
   });
 
@@ -32,7 +34,7 @@ export default function Stock() {
       if (res.ok) {
         alert('Stock added successfully!');
         setShowForm(false);
-        setFormData({ itemName: '', quantity: 0, category: 'oil' });
+        setFormData({ itemName: '', quantity: 0, costPrice: 0, salePrice: 0, category: 'oil' });
         fetchStock();
       }
     } catch (error) {
@@ -68,7 +70,7 @@ export default function Stock() {
 
           {showForm && (
             <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">Item Name</label>
                   <input
@@ -87,6 +89,26 @@ export default function Stock() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.quantity}
                     onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Cost Price (Rs.)</label>
+                  <input
+                    type="number"
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    value={formData.costPrice}
+                    onChange={(e) => setFormData({...formData, costPrice: parseInt(e.target.value)})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-2">Sale Price (Rs.)</label>
+                  <input
+                    type="number"
+                    required
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    value={formData.salePrice}
+                    onChange={(e) => setFormData({...formData, salePrice: parseInt(e.target.value)})}
                   />
                 </div>
                 <div>
@@ -115,6 +137,9 @@ export default function Stock() {
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Item Name</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Category</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Cost</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Sale Price</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Profit</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
                 </tr>
@@ -124,6 +149,11 @@ export default function Stock() {
                   <tr key={item._id} className={item.quantity <= 5 ? 'bg-red-50' : 'hover:bg-gray-50'}>
                     <td className="px-4 py-3 text-sm">{item.itemName}</td>
                     <td className="px-4 py-3 text-sm capitalize">{item.category.replace('-', ' ')}</td>
+                    <td className="px-4 py-3 text-sm">Rs. {item.costPrice || item.price || 0}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-green-600">Rs. {item.salePrice || item.price || 0}</td>
+                    <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                      Rs. {(item.salePrice || item.price || 0) - (item.costPrice || item.price || 0)}
+                    </td>
                     <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
                     <td className="px-4 py-3 text-sm">
                       {item.quantity <= 5 ? (

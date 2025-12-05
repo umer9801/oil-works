@@ -10,6 +10,9 @@ export default function Dashboard() {
   const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
+    // Check if we're in the browser
+    if (typeof window === 'undefined') return;
+
     // Check authentication
     const isLoggedIn = localStorage.getItem('isLoggedIn');
     if (!isLoggedIn) {
@@ -183,6 +186,19 @@ export default function Dashboard() {
                 Receipts
               </h2>
               <p className="text-gray-600 text-sm md:text-base">View all receipts</p>
+            </div>
+          </Link>
+
+          {/* Reports */}
+          <Link href="/reports">
+            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
+              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
+                📊
+              </div>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
+                Reports
+              </h2>
+              <p className="text-gray-600 text-sm md:text-base">Profit/Loss analysis</p>
             </div>
           </Link>
         </div>

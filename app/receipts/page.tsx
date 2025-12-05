@@ -20,17 +20,12 @@ export default function Receipts() {
     // Prepare data for Excel
     const excelData = receipts.map((receipt: any) => ({
       'Date': new Date(receipt.createdAt).toLocaleDateString(),
+      'Customer Name': receipt.customerName || 'N/A',
+      'Phone': receipt.customerPhone || 'N/A',
       'Vehicle Number': receipt.vehicleNo,
       'Model': receipt.model,
-      'Oil': receipt.oil,
-      'Oil Filter': receipt.oilFilter,
-      'Air Filter': receipt.airFilter,
-      'A/C Filter': receipt.acFilter,
-      'Used Mileage': receipt.usedMileage,
-      'Over Mileage': receipt.overMileage,
-      'New Mileage': receipt.newMileage,
-      'New Running': receipt.newRunning,
-      'After Change': receipt.afterChange,
+      'Items': receipt.items ? receipt.items.map((item: any) => `${item.itemName} x${item.quantity}`).join(', ') : 'N/A',
+      'Subtotal': receipt.subtotal || receipt.totalAmount,
       'Total Amount': receipt.totalAmount
     }));
 
@@ -88,9 +83,10 @@ export default function Receipts() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Date</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vehicle No</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Model</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Oil</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Customer</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Phone</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Vehicle</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Items</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Amount</th>
                 </tr>
               </thead>
@@ -100,9 +96,18 @@ export default function Receipts() {
                     <td className="px-4 py-3 text-sm">
                       {new Date(receipt.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3 text-sm">{receipt.vehicleNo}</td>
-                    <td className="px-4 py-3 text-sm">{receipt.model}</td>
-                    <td className="px-4 py-3 text-sm">{receipt.oil}</td>
+                    <td className="px-4 py-3 text-sm font-medium">{receipt.customerName || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm">{receipt.customerPhone || 'N/A'}</td>
+                    <td className="px-4 py-3 text-sm">{receipt.vehicleNo} ({receipt.model})</td>
+                    <td className="px-4 py-3 text-sm">
+                      {receipt.items && receipt.items.length > 0 ? (
+                        <div className="text-xs">
+                          {receipt.items.map((item: any, idx: number) => (
+                            <div key={idx}>{item.itemName} x{item.quantity}</div>
+                          ))}
+                        </div>
+                      ) : 'N/A'}
+                    </td>
                     <td className="px-4 py-3 text-sm font-bold text-green-600">
                       Rs. {receipt.totalAmount}
                     </td>
