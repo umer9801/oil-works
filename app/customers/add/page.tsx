@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Prevent SSR issues
+const isBrowser = typeof window !== 'undefined';
+
 export default function AddCustomer() {
   const router = useRouter();
   const [formData, setFormData] = useState({

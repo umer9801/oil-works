@@ -44,7 +44,9 @@ export default function Dashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('isLoggedIn');
+    }
     router.push('/login');
   };
 

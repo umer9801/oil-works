@@ -11,9 +11,11 @@ export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Simple authentication (aap baad mein database se verify kar sakte hain)
+    // Simple authentication
     if (credentials.username === 'admin' && credentials.password === 'admin123') {
-      localStorage.setItem('isLoggedIn', 'true');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('isLoggedIn', 'true');
+      }
       router.push('/dashboard');
     } else {
       setError('Invalid username or password!');

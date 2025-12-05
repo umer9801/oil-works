@@ -2,6 +2,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
+// Prevent SSR issues
+const isBrowser = typeof window !== 'undefined';
+
 export default function Reports() {
   const [receipts, setReceipts] = useState([]);
   const [stock, setStock] = useState([]);

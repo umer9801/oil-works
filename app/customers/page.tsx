@@ -3,6 +3,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 
+// Prevent SSR issues
+const isBrowser = typeof window !== 'undefined';
+
 export default function Customers() {
   const [customers, setCustomers] = useState([]);
   const [editingId, setEditingId] = useState<string | null>(null);

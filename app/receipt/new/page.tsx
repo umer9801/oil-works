@@ -3,6 +3,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+// Prevent SSR issues
+const isBrowser = typeof window !== 'undefined';
+
 interface ReceiptItem {
   itemId: string;
   itemName: string;
