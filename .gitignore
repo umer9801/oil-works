@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Documentation and guide files
+SETUP-GUIDE-URDU.md
+MONGODB-QUICK-SETUP.md
+START-PROJECT.md
+LOGIN-INFO.md
+FEATURES-COMPLETE.md
+NEW-FEATURES.md
+DEPLOYMENT-GUIDE.md
+public/logo-instructions.txt
