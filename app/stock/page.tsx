@@ -39,14 +39,19 @@ export default function Stock() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
         alert('Stock added successfully!');
         setShowForm(false);
         setFormData({ itemName: '', quantity: 0, costPrice: 0, salePrice: 0, category: 'oil' });
         fetchStock();
+      } else {
+        alert(data.error || 'Failed to add stock');
       }
-    } catch (error) {
-      alert('Failed to add stock');
+    } catch (error: any) {
+      console.error('Error adding stock:', error);
+      alert('Failed to add stock: ' + error.message);
     }
   };
 

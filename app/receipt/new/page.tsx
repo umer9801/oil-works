@@ -150,12 +150,17 @@ export default function NewReceipt() {
           totalAmount: subtotal
         })
       });
-      if (res.ok) {
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
         alert('Receipt created successfully!');
         handlePrint();
+      } else {
+        alert(data.error || 'Failed to create receipt');
       }
-    } catch (error) {
-      alert('Failed to create receipt');
+    } catch (error: any) {
+      console.error('Error creating receipt:', error);
+      alert('Failed to create receipt: ' + error.message);
     }
   };
 

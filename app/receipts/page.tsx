@@ -8,20 +8,47 @@ const isBrowser = typeof window !== 'undefined';
 
 export default function Receipts() {
   const [receipts, setReceipts] = useState([]);
+  const [filteredReceipts, setFilteredReceipts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchReceipts();
   }, []);
 
+  useEffect(() => {
+    filterReceipts();
+  }, [searchTerm, receipts]);
+
   const fetchReceipts = async () => {
     try {
       const res = await fetch('/api/receipts');
       const data = await res.json();
-      setReceipts(Array.isArray(data) ? data : data.receipts || []);
+      const receiptsData = Array.isArray(data) ? data : data.receipts || [];
+      setReceipts(receiptsData);
+      setFilteredReceipts(receiptsData);
     } catch (error) {
       console.error('Failed to fetch receipts:', error);
       setReceipts([]);
+      setFilteredReceipts([]);
     }
+  };
+
+  const filterReceipts = () => {
+    if (!searchTerm.trim()) {
+      setFilteredReceipts(receipts);
+      return;
+    }
+
+    const term = searchTerm.toLowerCase();
+    const filtered = receipts.filter((receipt: any) => {
+      return (
+        receipt.customerName?.toLowerCase().includes(term) ||
+        receipt.customerPhone?.toLowerCase().includes(term) ||
+        receipt.vehicleNo?.toLowerCase().includes(term) ||
+        receipt.model?.toLowerCase().includes(term)
+      );
+    });
+    setFilteredReceipts(filtered);
   };
 
   const handleExportExcel = () => {
@@ -86,6 +113,33 @@ export default function Receipts() {
             </button>
           </div>
 
+          {/* Search Bar */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search by customer name, phone, vehicle number, or model..."
+                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <span className="absolute left-4 top-3.5 text-gray-400 text-xl">🔍</span>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 top-3 text-gray-400 hover:text-gray-600"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="text-sm text-gray-600 mt-2">
+                Found {filteredReceipts.length} receipt(s) matching "{searchTerm}"
+              </p>
+            )}
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -99,7 +153,7 @@ export default function Receipts() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {receipts.map((receipt: any) => (
+                {filteredReceipts.map((receipt: any) => (
                   <tr key={receipt._id} className="hover:bg-gray-50">
                     <td className="px-4 py-3 text-sm">
                       {new Date(receipt.createdAt).toLocaleDateString()}
@@ -124,31 +178,44 @@ export default function Receipts() {
               </tbody>
             </table>
             
-            {receipts.length === 0 && (
+            {filteredReceipts.length === 0 && receipts.length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 No receipts found. Create your first receipt!
+              </div>
+            )}
+            
+            {filteredReceipts.length === 0 && receipts.length > 0 && (
+              <div className="text-center py-8 text-gray-500">
+                No receipts match your search. Try different keywords.
               </div>
             )}
           </div>
 
           {/* Summary Section */}
-          {receipts.length > 0 && (
+          {filteredReceipts.length > 0 && (
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center">
-                  <p className="text-gray-600 text-sm">Total Receipts</p>
-                  <p className="text-2xl font-bold text-gray-800">{receipts.length}</p>
+                  <p className="text-gray-600 text-sm">
+                    {searchTerm ? 'Filtered' : 'Total'} Receipts
+                  </p>
+                  <p className="text-2xl font-bold text-gray-800">{filteredReceipts.length}</p>
+                  {searchTerm && receipts.length > filteredReceipts.length && (
+                    <p className="text-xs text-gray-500 mt-1">of {receipts.length} total</p>
+                  )}
                 </div>
                 <div className="text-center">
-                  <p className="text-gray-600 text-sm">Total Revenue</p>
+                  <p className="text-gray-600 text-sm">
+                    {searchTerm ? 'Filtered' : 'Total'} Revenue
+                  </p>
                   <p className="text-2xl font-bold text-green-600">
-                    Rs. {receipts.reduce((sum: number, r: any) => sum + r.totalAmount, 0)}
+                    Rs. {filteredReceipts.reduce((sum: number, r: any) => sum + r.totalAmount, 0).toLocaleString()}
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-gray-600 text-sm">Average Amount</p>
                   <p className="text-2xl font-bold text-blue-600">
-                    Rs. {Math.round(receipts.reduce((sum: number, r: any) => sum + r.totalAmount, 0) / receipts.length)}
+                    Rs. {filteredReceipts.length > 0 ? Math.round(filteredReceipts.reduce((sum: number, r: any) => sum + r.totalAmount, 0) / filteredReceipts.length).toLocaleString() : 0}
                   </p>
                 </div>
               </div>

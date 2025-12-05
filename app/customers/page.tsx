@@ -48,13 +48,18 @@ export default function Customers() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id, ...editForm })
       });
+      const data = await res.json();
+      
       if (res.ok) {
         alert('Customer updated successfully!');
         setEditingId(null);
         fetchCustomers();
+      } else {
+        alert(data.error || 'Failed to update customer');
       }
-    } catch (error) {
-      alert('Failed to update customer');
+    } catch (error: any) {
+      console.error('Error updating customer:', error);
+      alert('Failed to update customer: ' + error.message);
     }
   };
 
@@ -64,12 +69,17 @@ export default function Customers() {
         const res = await fetch(`/api/customers?id=${id}`, {
           method: 'DELETE'
         });
+        const data = await res.json();
+        
         if (res.ok) {
           alert('Customer deleted successfully!');
           fetchCustomers();
+        } else {
+          alert(data.error || 'Failed to delete customer');
         }
-      } catch (error) {
-        alert('Failed to delete customer');
+      } catch (error: any) {
+        console.error('Error deleting customer:', error);
+        alert('Failed to delete customer: ' + error.message);
       }
     }
   };

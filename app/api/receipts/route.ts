@@ -20,9 +20,14 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
+    console.log('Creating receipt:', body);
     const receipt = await Receipt.create(body);
-    return NextResponse.json(receipt, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create receipt' }, { status: 500 });
+    return NextResponse.json({ success: true, receipt }, { status: 201 });
+  } catch (error: any) {
+    console.error('Failed to create receipt:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to create receipt' 
+    }, { status: 500 });
   }
 }

@@ -23,12 +23,17 @@ export default function AddCustomer() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
         alert('Customer added successfully!');
         router.push('/customers');
+      } else {
+        alert(data.error || 'Failed to add customer');
       }
-    } catch (error) {
-      alert('Failed to add customer');
+    } catch (error: any) {
+      console.error('Error adding customer:', error);
+      alert('Failed to add customer: ' + error.message);
     }
   };
 

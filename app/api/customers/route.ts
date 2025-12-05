@@ -20,10 +20,15 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
+    console.log('Creating customer:', body);
     const customer = await Customer.create(body);
-    return NextResponse.json(customer, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create customer' }, { status: 500 });
+    return NextResponse.json({ success: true, customer }, { status: 201 });
+  } catch (error: any) {
+    console.error('Failed to create customer:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to create customer' 
+    }, { status: 500 });
   }
 }
 

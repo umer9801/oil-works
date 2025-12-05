@@ -20,10 +20,15 @@ export async function POST(request: Request) {
   try {
     await dbConnect();
     const body = await request.json();
+    console.log('Creating stock:', body);
     const stock = await Stock.create(body);
-    return NextResponse.json(stock, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to create stock' }, { status: 500 });
+    return NextResponse.json({ success: true, stock }, { status: 201 });
+  } catch (error: any) {
+    console.error('Failed to create stock:', error);
+    return NextResponse.json({ 
+      success: false,
+      error: error.message || 'Failed to create stock' 
+    }, { status: 500 });
   }
 }
 
