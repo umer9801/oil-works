@@ -5,10 +5,14 @@ import Stock from '@/models/Stock';
 export async function GET() {
   try {
     await dbConnect();
-    const stock = await Stock.find({}).sort({ updatedAt: -1 });
-    return NextResponse.json(stock);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch stock' }, { status: 500 });
+    const stock = await Stock.find({}).sort({ updatedAt: -1 }).lean();
+    return NextResponse.json(stock || []);
+  } catch (error: any) {
+    console.error('Stock fetch error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Failed to fetch stock',
+      stock: []
+    }, { status: 200 }); // Return 200 with empty array
   }
 }
 

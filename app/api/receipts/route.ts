@@ -5,10 +5,14 @@ import Receipt from '@/models/Receipt';
 export async function GET() {
   try {
     await dbConnect();
-    const receipts = await Receipt.find({}).sort({ createdAt: -1 });
-    return NextResponse.json(receipts);
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch receipts' }, { status: 500 });
+    const receipts = await Receipt.find({}).sort({ createdAt: -1 }).lean();
+    return NextResponse.json(receipts || []);
+  } catch (error: any) {
+    console.error('Receipts fetch error:', error);
+    return NextResponse.json({ 
+      error: error.message || 'Failed to fetch receipts',
+      receipts: []
+    }, { status: 200 }); // Return 200 with empty array
   }
 }
 

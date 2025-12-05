@@ -22,11 +22,13 @@ export default function Reports() {
       ]);
       const receiptsData = await receiptsRes.json();
       const stockData = await stockRes.json();
-      setReceipts(receiptsData);
-      setStock(stockData);
+      setReceipts(Array.isArray(receiptsData) ? receiptsData : receiptsData.receipts || []);
+      setStock(Array.isArray(stockData) ? stockData : stockData.stock || []);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch data');
+      console.error('Failed to fetch data:', error);
+      setReceipts([]);
+      setStock([]);
       setLoading(false);
     }
   };

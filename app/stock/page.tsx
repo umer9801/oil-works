@@ -21,9 +21,14 @@ export default function Stock() {
   }, []);
 
   const fetchStock = async () => {
-    const res = await fetch('/api/stock');
-    const data = await res.json();
-    setStock(data);
+    try {
+      const res = await fetch('/api/stock');
+      const data = await res.json();
+      setStock(Array.isArray(data) ? data : data.stock || []);
+    } catch (error) {
+      console.error('Failed to fetch stock:', error);
+      setStock([]);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

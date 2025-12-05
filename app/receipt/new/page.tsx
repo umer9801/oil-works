@@ -42,9 +42,10 @@ export default function NewReceipt() {
     try {
       const res = await fetch('/api/customers');
       const data = await res.json();
-      setCustomers(data);
+      setCustomers(Array.isArray(data) ? data : data.customers || []);
     } catch (error) {
-      console.error('Failed to fetch customers');
+      console.error('Failed to fetch customers:', error);
+      setCustomers([]);
     }
   };
 
@@ -52,9 +53,10 @@ export default function NewReceipt() {
     try {
       const res = await fetch('/api/stock');
       const data = await res.json();
-      setStock(data);
+      setStock(Array.isArray(data) ? data : data.stock || []);
     } catch (error) {
-      console.error('Failed to fetch stock');
+      console.error('Failed to fetch stock:', error);
+      setStock([]);
     }
   };
 

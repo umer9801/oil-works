@@ -9,7 +9,11 @@ export default function Home() {
   useEffect(() => {
     // Check if we're in the browser
     if (typeof window !== 'undefined') {
-      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      // Check both cookie and localStorage
+      const cookieAuth = document.cookie.includes('oil_works_auth=true');
+      const localAuth = localStorage.getItem('isLoggedIn') === 'true';
+      const isLoggedIn = cookieAuth || localAuth;
+      
       if (!isLoggedIn) {
         router.push('/login');
       } else {

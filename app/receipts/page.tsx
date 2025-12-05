@@ -14,9 +14,14 @@ export default function Receipts() {
   }, []);
 
   const fetchReceipts = async () => {
-    const res = await fetch('/api/receipts');
-    const data = await res.json();
-    setReceipts(data);
+    try {
+      const res = await fetch('/api/receipts');
+      const data = await res.json();
+      setReceipts(Array.isArray(data) ? data : data.receipts || []);
+    } catch (error) {
+      console.error('Failed to fetch receipts:', error);
+      setReceipts([]);
+    }
   };
 
   const handleExportExcel = () => {

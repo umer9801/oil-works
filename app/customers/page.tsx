@@ -21,9 +21,14 @@ export default function Customers() {
   }, []);
 
   const fetchCustomers = async () => {
-    const res = await fetch('/api/customers');
-    const data = await res.json();
-    setCustomers(data);
+    try {
+      const res = await fetch('/api/customers');
+      const data = await res.json();
+      setCustomers(Array.isArray(data) ? data : data.customers || []);
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+      setCustomers([]);
+    }
   };
 
   const handleEdit = (customer: any) => {

@@ -13,8 +13,11 @@ export default function Dashboard() {
     // Check if we're in the browser
     if (typeof window === 'undefined') return;
 
-    // Check authentication
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    // Check authentication (cookie or localStorage)
+    const cookieAuth = document.cookie.includes('oil_works_auth=true');
+    const localAuth = localStorage.getItem('isLoggedIn') === 'true';
+    const isLoggedIn = cookieAuth || localAuth;
+    
     if (!isLoggedIn) {
       router.push('/login');
       return;
@@ -45,6 +48,8 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
+      // Clear both cookie and localStorage
+      document.cookie = 'oil_works_auth=; max-age=0; path=/';
       localStorage.removeItem('isLoggedIn');
     }
     router.push('/login');

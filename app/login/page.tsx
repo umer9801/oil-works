@@ -14,6 +14,8 @@ export default function Login() {
     // Simple authentication
     if (credentials.username === 'admin' && credentials.password === 'admin123') {
       if (typeof window !== 'undefined') {
+        // Set both cookie and localStorage
+        document.cookie = `oil_works_auth=true; max-age=${7 * 24 * 60 * 60}; path=/; SameSite=Strict`;
         localStorage.setItem('isLoggedIn', 'true');
       }
       router.push('/dashboard');
