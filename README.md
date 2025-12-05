@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Oil Works - POS System
 
-## Getting Started
+Oil changing shop ke liye complete Point of Sale system with mobile app support.
 
-First, run the development server:
+## Features
+
+✅ **Customer Management** - Add aur view customers
+✅ **Stock Management** - Inventory tracking with low stock alerts (5 se kam)
+✅ **Receipt Generation** - Professional receipts with print support
+✅ **Data Storage** - MongoDB ke saath 30 days data retention
+✅ **Responsive UI** - Mobile aur laptop dono ke liye optimized
+✅ **PWA Support** - Phone pe app ki tarah install ho sakta hai
+
+## Setup Instructions
+
+### 1. MongoDB Setup
+
+1. [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) pe free account banayein
+2. New cluster create karein (free tier)
+3. Database user create karein
+4. Connection string copy karein
+5. `.env.local` file mein paste karein:
+
+```
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/oil-works?retryWrites=true&w=majority
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+### 3. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Browser mein open karein: `http://localhost:3000`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Phone Pe Install Karne Ke Liye
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Mobile browser mein website open karein
+2. Browser menu mein "Add to Home Screen" option select karein
+3. App install ho jayega
 
-## Learn More
+## Usage
 
-To learn more about Next.js, take a look at the following resources:
+- **Home Page**: Main dashboard with all options
+- **Add Customer**: Naye customers register karein
+- **Manage Stock**: Inventory add/view karein, low stock alerts dekhein
+- **New Receipt**: Service receipt create aur print karein
+- **View Receipts**: Past receipts history
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Tech Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Database**: MongoDB with Mongoose
+- **PWA**: Progressive Web App support
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Customer aur receipt data automatically 30 days baad delete ho jata hai
+- Stock 5 se kam hone pe red alert show hota hai
+- Receipt print ke liye browser ka print function use hota hai
+- Mobile aur desktop dono pe fully responsive
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contact
+
+For support: [Your Contact Info]

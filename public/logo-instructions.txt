@@ -1,0 +1,27 @@
+LOGO SETUP INSTRUCTIONS
+========================
+
+✅ CURRENT SETUP: Using logo.jpeg
+
+Apna logo add karne ke liye:
+
+1. Apni logo image file ko "logo.jpeg" naam se save karein
+2. Is file ko "public" folder mein paste karein
+   Location: the-oil-works/public/logo.jpeg
+3. Recommended size: 512x512 pixels (square)
+4. Supported formats: JPEG, PNG, SVG
+
+Agar logo nahi hai to:
+- Online logo maker use kar sakte hain (Canva, LogoMaker, etc.)
+- Ya koi simple image use kar sakte hain
+- Default SVG placeholder available hai
+
+Logo dikhega:
+- Login page pe (center mein, large size)
+- Dashboard header pe (top left, small size)
+
+Note: Agar aap PNG ya SVG use karna chahte hain:
+1. File ko public folder mein add karein
+2. app/login/page.tsx mein line 42 update karein
+3. app/dashboard/page.tsx mein line 67 update karein
+   Change: src="/logo.jpeg" to src="/logo.png" (or .svg)
