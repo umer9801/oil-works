@@ -9,14 +9,38 @@ body {
 }
 
 @media print {
+  /* Hide everything except print-only content */
+  body * {
+    visibility: hidden;
+  }
+  
   .no-print {
     display: none !important;
   }
-  .print-only {
+  
+  .print-only,
+  .print-only * {
+    visibility: visible !important;
     display: block !important;
   }
+  
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
   body {
     background: white;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Ensure page breaks properly */
+  @page {
+    size: auto;
+    margin: 10mm;
   }
 }
 
