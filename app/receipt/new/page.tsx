@@ -5,6 +5,7 @@ import Toast from '@/components/Toast';
 
 interface ReceiptItem {
   itemId: string;
+  uniqueId: string; // Unique identifier for each item in receipt
   itemName: string;
   category: string;
   quantity: number;
@@ -121,6 +122,7 @@ export default function NewReceipt() {
     // For non-oil items, add directly
     const newItem: ReceiptItem = {
       itemId: (stockItem as any)._id,
+      uniqueId: `${(stockItem as any)._id}-${Date.now()}-${Math.random()}`, // Unique ID for each entry
       itemName: (stockItem as any).itemName,
       category: (stockItem as any).category,
       quantity: 1,
@@ -159,6 +161,7 @@ export default function NewReceipt() {
 
     const newItem: ReceiptItem = {
       itemId: selectedOilItem._id,
+      uniqueId: `${selectedOilItem._id}-${Date.now()}-${Math.random()}`, // Unique ID for each entry
       itemName: selectedOilItem.itemName,
       category: 'oil',
       quantity: 1,
@@ -174,19 +177,19 @@ export default function NewReceipt() {
     setOilLitres('');
   };
 
-  const handleQuantityChange = (itemId: string, quantity: number) => {
+  const handleQuantityChange = (uniqueId: string, quantity: number) => {
     setItems(items.map(item => {
-      if (item.itemId === itemId && item.category !== 'oil') {
+      if (item.uniqueId === uniqueId && item.category !== 'oil') {
         return { ...item, quantity, total: item.price * quantity };
       }
       return item;
     }));
   };
 
-  const handleLitresChange = (itemId: string, litres: number) => {
+  const handleLitresChange = (uniqueId: string, litres: number) => {
     setItems(items.map(item => {
-      if (item.itemId === itemId && item.category === 'oil') {
-        const stockItem = stock.find((s: any) => s._id === itemId);
+      if (item.uniqueId === uniqueId && item.category === 'oil') {
+        const stockItem = stock.find((s: any) => s._id === item.itemId);
         const pricePerLitre = (stockItem as any)?.pricePerLitre || 0;
         const totalPrice = litres * pricePerLitre;
         return { ...item, litres, price: totalPrice, total: totalPrice };
@@ -195,8 +198,8 @@ export default function NewReceipt() {
     }));
   };
 
-  const handleRemoveItem = (itemId: string) => {
-    setItems(items.filter(item => item.itemId !== itemId));
+  const handleRemoveItem = (uniqueId: string) => {
+    setItems(items.filter(item => item.uniqueId !== uniqueId));
   };
 
   const calculateSubtotal = () => {
@@ -539,7 +542,7 @@ export default function NewReceipt() {
                           const isFullGallon = item.category === 'oil' && item.litres === (stockItem as any)?.litresPerGallon;
                           
                           return (
-                            <tr key={item.itemId} className="border-b">
+                            <tr key={item.uniqueId} className="border-b">
                               <td className="px-4 py-2">
                                 {item.itemName}
                                 {item.category === 'oil' && <span className="text-xs text-gray-500"> (Oil)</span>}
@@ -556,7 +559,7 @@ export default function NewReceipt() {
                                         step="0.1"
                                         className="w-20 px-2 py-1 border rounded text-center"
                                         value={item.litres || 0}
-                                        onChange={(e) => handleLitresChange(item.itemId, parseFloat(e.target.value) || 0)}
+                                        onChange={(e) => handleLitresChange(item.uniqueId, parseFloat(e.target.value) || 0)}
                                       />
                                       <span className="text-xs">L</span>
                                     </div>
@@ -567,7 +570,7 @@ export default function NewReceipt() {
                                     min="1"
                                     className="w-20 px-2 py-1 border rounded text-center"
                                     value={item.quantity}
-                                    onChange={(e) => handleQuantityChange(item.itemId, parseInt(e.target.value) || 1)}
+                                    onChange={(e) => handleQuantityChange(item.uniqueId, parseInt(e.target.value) || 1)}
                                   />
                                 )}
                               </td>
@@ -580,7 +583,7 @@ export default function NewReceipt() {
                               <td className="px-4 py-2 text-center">
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveItem(item.itemId)}
+                                  onClick={() => handleRemoveItem(item.uniqueId)}
                                   className="text-red-600 hover:text-red-800"
                                 >
                                   ✕

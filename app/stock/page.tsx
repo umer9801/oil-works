@@ -398,55 +398,169 @@ export default function Stock() {
                 <tbody className="divide-y divide-gray-200">
                   {getStockByCategory(activeTab).map((item: any) => (
                     <tr key={item._id} className={item.quantity <= 5 ? 'bg-red-50' : 'hover:bg-gray-50'}>
-                      <td className="px-4 py-3 text-sm font-medium">{item.itemName}</td>
-                      {activeTab === 'oil' && (
+                      {editingId === item._id ? (
+                        // EDIT MODE
                         <>
-                          <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
-                          <td className="px-4 py-3 text-sm">{item.litresPerGallon || 0}L</td>
-                          <td className="px-4 py-3 text-sm text-purple-600">
-                            {item.remainingLitresInCurrentGallon > 0 
-                              ? `${item.remainingLitresInCurrentGallon.toFixed(1)}L remaining` 
-                              : 'Full gallons only'}
+                          <td className="px-4 py-3">
+                            <input
+                              type="text"
+                              className="w-full px-2 py-1 border rounded text-sm"
+                              value={editForm.itemName}
+                              onChange={(e) => setEditForm({...editForm, itemName: e.target.value})}
+                            />
                           </td>
-                          <td className="px-4 py-3 text-sm">Rs. {item.pricePerLitre || 0}</td>
-                          <td className="px-4 py-3 text-sm">Rs. {item.salePrice || 0}</td>
+                          {activeTab === 'oil' && (
+                            <>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-20 px-2 py-1 border rounded text-sm"
+                                  value={editForm.quantity}
+                                  onChange={(e) => setEditForm({...editForm, quantity: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-20 px-2 py-1 border rounded text-sm"
+                                  value={editForm.litresPerGallon}
+                                  onChange={(e) => setEditForm({...editForm, litresPerGallon: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3 text-sm text-gray-500">
+                                {item.remainingLitresInCurrentGallon > 0 
+                                  ? `${item.remainingLitresInCurrentGallon.toFixed(1)}L` 
+                                  : '-'}
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-20 px-2 py-1 border rounded text-sm"
+                                  value={editForm.pricePerLitre}
+                                  onChange={(e) => setEditForm({...editForm, pricePerLitre: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-24 px-2 py-1 border rounded text-sm"
+                                  value={editForm.salePrice}
+                                  onChange={(e) => setEditForm({...editForm, salePrice: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                            </>
+                          )}
+                          {activeTab !== 'oil' && (
+                            <>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-20 px-2 py-1 border rounded text-sm"
+                                  value={editForm.quantity}
+                                  onChange={(e) => setEditForm({...editForm, quantity: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-24 px-2 py-1 border rounded text-sm"
+                                  value={editForm.costPrice}
+                                  onChange={(e) => setEditForm({...editForm, costPrice: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3">
+                                <input
+                                  type="number"
+                                  className="w-24 px-2 py-1 border rounded text-sm"
+                                  value={editForm.salePrice}
+                                  onChange={(e) => setEditForm({...editForm, salePrice: parseFloat(e.target.value) || 0})}
+                                />
+                              </td>
+                              <td className="px-4 py-3 text-sm text-blue-600">
+                                Rs. {editForm.salePrice - editForm.costPrice}
+                              </td>
+                            </>
+                          )}
+                          <td className="px-4 py-3 text-sm">
+                            {editForm.quantity <= 5 ? (
+                              <span className="text-red-600 font-medium">⚠️ Low</span>
+                            ) : (
+                              <span className="text-green-600">✓ OK</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleUpdate(item._id)}
+                                disabled={loading}
+                                className="bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 disabled:bg-gray-400"
+                              >
+                                ✓
+                              </button>
+                              <button
+                                onClick={() => setEditingId(null)}
+                                disabled={loading}
+                                className="bg-gray-600 text-white px-2 py-1 rounded text-xs hover:bg-gray-700 disabled:bg-gray-400"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </td>
+                        </>
+                      ) : (
+                        // VIEW MODE
+                        <>
+                          <td className="px-4 py-3 text-sm font-medium">{item.itemName}</td>
+                          {activeTab === 'oil' && (
+                            <>
+                              <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
+                              <td className="px-4 py-3 text-sm">{item.litresPerGallon || 0}L</td>
+                              <td className="px-4 py-3 text-sm text-purple-600">
+                                {item.remainingLitresInCurrentGallon > 0 
+                                  ? `${item.remainingLitresInCurrentGallon.toFixed(1)}L remaining` 
+                                  : 'Full gallons only'}
+                              </td>
+                              <td className="px-4 py-3 text-sm">Rs. {item.pricePerLitre || 0}</td>
+                              <td className="px-4 py-3 text-sm">Rs. {item.salePrice || 0}</td>
+                            </>
+                          )}
+                          {activeTab !== 'oil' && (
+                            <>
+                              <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
+                              <td className="px-4 py-3 text-sm">Rs. {item.costPrice || 0}</td>
+                              <td className="px-4 py-3 text-sm font-bold text-green-600">Rs. {item.salePrice || 0}</td>
+                              <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                                Rs. {(item.salePrice || 0) - (item.costPrice || 0)}
+                              </td>
+                            </>
+                          )}
+                          <td className="px-4 py-3 text-sm">
+                            {item.quantity <= 5 ? (
+                              <span className="text-red-600 font-medium">⚠️ Low</span>
+                            ) : (
+                              <span className="text-green-600">✓ OK</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleEdit(item)}
+                                disabled={loading}
+                                className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 disabled:bg-gray-400"
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                onClick={() => handleDelete(item._id, item.itemName)}
+                                disabled={loading}
+                                className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 disabled:bg-gray-400"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
                         </>
                       )}
-                      {activeTab !== 'oil' && (
-                        <>
-                          <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
-                          <td className="px-4 py-3 text-sm">Rs. {item.costPrice || 0}</td>
-                          <td className="px-4 py-3 text-sm font-bold text-green-600">Rs. {item.salePrice || 0}</td>
-                          <td className="px-4 py-3 text-sm font-bold text-blue-600">
-                            Rs. {(item.salePrice || 0) - (item.costPrice || 0)}
-                          </td>
-                        </>
-                      )}
-                      <td className="px-4 py-3 text-sm">
-                        {item.quantity <= 5 ? (
-                          <span className="text-red-600 font-medium">⚠️ Low</span>
-                        ) : (
-                          <span className="text-green-600">✓ OK</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-1">
-                          <button
-                            onClick={() => handleEdit(item)}
-                            disabled={loading}
-                            className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 disabled:bg-gray-400"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => handleDelete(item._id, item.itemName)}
-                            disabled={loading}
-                            className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700 disabled:bg-gray-400"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
                     </tr>
                   ))}
                 </tbody>
