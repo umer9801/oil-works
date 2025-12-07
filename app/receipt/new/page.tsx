@@ -29,17 +29,17 @@ export default function NewReceipt() {
   const [toast, setToast] = useState<ToastState>({ show: false, message: '', type: 'info' });
   const [showOilLitreModal, setShowOilLitreModal] = useState(false);
   const [selectedOilItem, setSelectedOilItem] = useState<any>(null);
-  const [oilLitres, setOilLitres] = useState(1);
+  const [oilLitres, setOilLitres] = useState('');
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
     vehicleNo: '',
     model: '',
-    usedMileage: 0,
-    overMileage: 0,
-    newMileage: 0,
-    newRunning: 0,
-    afterChange: 0
+    usedMileage: '',
+    overMileage: '',
+    newMileage: '',
+    newRunning: '',
+    afterChange: ''
   });
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function NewReceipt() {
     // If it's oil, show litre selection modal
     if ((stockItem as any).category === 'oil') {
       setSelectedOilItem(stockItem);
-      setOilLitres(1);
+      setOilLitres('');
       setShowOilLitreModal(true);
       e.target.value = '';
       return;
@@ -139,11 +139,16 @@ export default function NewReceipt() {
   };
 
   const handleAddOilWithLitres = () => {
-    if (!selectedOilItem || oilLitres <= 0) return;
+    const litresValue = parseFloat(oilLitres as string);
+    
+    if (!selectedOilItem || !litresValue || litresValue <= 0) {
+      showToast('Please enter a valid quantity!', 'error');
+      return;
+    }
 
     const totalAvailableLitres = (selectedOilItem.quantity * selectedOilItem.litresPerGallon) + (selectedOilItem.remainingLitresInCurrentGallon || 0);
     
-    if (oilLitres > totalAvailableLitres) {
+    if (litresValue > totalAvailableLitres) {
       showToast(`Only ${totalAvailableLitres.toFixed(1)} litres available!`, 'error');
       return;
     }
@@ -152,26 +157,26 @@ export default function NewReceipt() {
     const litresPerGallon = selectedOilItem.litresPerGallon || 1;
     
     // Check if customer wants full gallon(s)
-    const isFullGallon = oilLitres % litresPerGallon === 0;
-    const totalPrice = isFullGallon && oilLitres === litresPerGallon 
+    const isFullGallon = litresValue % litresPerGallon === 0;
+    const totalPrice = isFullGallon && litresValue === litresPerGallon 
       ? selectedOilItem.salePrice // Use gallon price for full gallon
-      : oilLitres * pricePerLitre; // Use per-litre price for partial
+      : litresValue * pricePerLitre; // Use per-litre price for partial
 
     const newItem: ReceiptItem = {
       itemId: selectedOilItem._id,
       itemName: selectedOilItem.itemName,
       category: 'oil',
       quantity: 1,
-      litres: oilLitres,
+      litres: litresValue,
       price: totalPrice,
       total: totalPrice,
-      costPrice: (selectedOilItem.costPrice / litresPerGallon) * oilLitres
+      costPrice: (selectedOilItem.costPrice / litresPerGallon) * litresValue
     };
 
     setItems([...items, newItem]);
     setShowOilLitreModal(false);
     setSelectedOilItem(null);
-    setOilLitres(1);
+    setOilLitres('');
   };
 
   const handleQuantityChange = (itemId: string, quantity: number) => {
@@ -259,58 +264,118 @@ export default function NewReceipt() {
       {/* Oil Litre Selection Modal */}
       {showOilLitreModal && selectedOilItem && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-bold mb-4">Select Oil Quantity</h3>
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl">
+            <h3 className="text-2xl font-bold mb-4 text-gray-800">Select Oil Quantity</h3>
+            
+            <div className="mb-6 bg-blue-50 p-4 rounded-xl border border-blue-200">
+              <p className="text-lg font-bold text-gray-800 mb-2">
+                {selectedOilItem.itemName}
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>
+                  <span className="font-medium">Available:</span> {selectedOilItem.quantity} gallons
+                  {selectedOilItem.remainingLitresInCurrentGallon > 0 && 
+                    <span className="text-orange-600"> + {selectedOilItem.remainingLitresInCurrentGallon.toFixed(1)}L</span>
+                  }
+                </div>
+                <div>
+                  <span className="font-medium">Per Gallon:</span> {selectedOilItem.litresPerGallon}L
+                </div>
+                <div>
+                  <span className="font-medium">Price/Litre:</span> Rs. {selectedOilItem.pricePerLitre}
+                </div>
+                <div>
+                  <span className="font-medium">Gallon Price:</span> Rs. {selectedOilItem.salePrice}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Selection Buttons */}
             <div className="mb-4">
-              <p className="text-sm text-gray-600 mb-2">
-                <strong>{selectedOilItem.itemName}</strong>
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                Available: {selectedOilItem.quantity} gallons 
-                {selectedOilItem.remainingLitresInCurrentGallon > 0 && 
-                  ` + ${selectedOilItem.remainingLitresInCurrentGallon.toFixed(1)}L (open gallon)`
-                }
-              </p>
-              <p className="text-sm text-gray-600 mb-2">
-                Price: Rs. {selectedOilItem.pricePerLitre}/litre or Rs. {selectedOilItem.salePrice}/gallon
-              </p>
-              <p className="text-xs text-gray-500 mb-4">
-                ({selectedOilItem.litresPerGallon}L per gallon)
-              </p>
-              <label className="block text-gray-700 font-medium mb-2">Litres Needed</label>
+              <label className="block text-gray-700 font-medium mb-3">Quick Select:</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setOilLitres(selectedOilItem.litresPerGallon.toString())}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg font-medium"
+                >
+                  🛢️ Full Gallon<br/>
+                  <span className="text-sm">({selectedOilItem.litresPerGallon}L - Rs. {selectedOilItem.salePrice})</span>
+                </button>
+                <button
+                  onClick={() => setOilLitres((selectedOilItem.litresPerGallon / 2).toString())}
+                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-3 rounded-xl hover:from-purple-600 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-medium"
+                >
+                  💧 Half Gallon<br/>
+                  <span className="text-sm">({(selectedOilItem.litresPerGallon / 2).toFixed(1)}L)</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Custom Litres Input */}
+            <div className="mb-4">
+              <label className="block text-gray-700 font-medium mb-2">Or Enter Custom Litres:</label>
               <input
                 type="number"
                 min="0.1"
                 step="0.1"
                 max={(selectedOilItem.quantity * selectedOilItem.litresPerGallon) + (selectedOilItem.remainingLitresInCurrentGallon || 0)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg font-medium"
                 value={oilLitres}
-                onChange={(e) => setOilLitres(parseFloat(e.target.value) || 0)}
+                onChange={(e) => setOilLitres(e.target.value)}
+                placeholder="Enter litres..."
               />
-              <p className="text-sm text-green-600 mt-2 font-bold">
-                Total: Rs. {
-                  (oilLitres === selectedOilItem.litresPerGallon 
-                    ? selectedOilItem.salePrice 
-                    : oilLitres * (selectedOilItem.pricePerLitre || 0)
-                  ).toFixed(2)
-                }
-                {oilLitres === selectedOilItem.litresPerGallon && ' (Full Gallon Price)'}
-              </p>
             </div>
-            <div className="flex gap-2">
+
+            {/* Price Display */}
+            <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-200">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm text-gray-600">Selected Quantity:</p>
+                  <p className="text-2xl font-bold text-gray-800">
+                    {oilLitres ? parseFloat(oilLitres as string).toFixed(1) : '0.0'} Litres
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Total Amount:</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    Rs. {
+                      oilLitres ? (
+                        parseFloat(oilLitres as string) === selectedOilItem.litresPerGallon 
+                          ? selectedOilItem.salePrice 
+                          : parseFloat(oilLitres as string) * (selectedOilItem.pricePerLitre || 0)
+                      ).toFixed(0) : '0'
+                    }
+                  </p>
+                  {oilLitres && parseFloat(oilLitres as string) === selectedOilItem.litresPerGallon && (
+                    <p className="text-xs text-green-600 font-medium">✓ Full Gallon Price</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
               <button
                 onClick={handleAddOilWithLitres}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                disabled={!oilLitres || parseFloat(oilLitres as string) <= 0}
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg hover:shadow-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
                 Add to Receipt
               </button>
               <button
                 onClick={() => {
                   setShowOilLitreModal(false);
                   setSelectedOilItem(null);
+                  setOilLitres('');
                 }}
-                className="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+                className="flex-1 bg-gray-500 text-white px-6 py-3 rounded-xl hover:bg-gray-600 transition-all shadow-lg hover:shadow-xl font-medium flex items-center justify-center gap-2"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
                 Cancel
               </button>
             </div>
@@ -535,7 +600,8 @@ export default function NewReceipt() {
                     type="number"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.usedMileage}
-                    onChange={(e) => setFormData({...formData, usedMileage: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({...formData, usedMileage: e.target.value})}
+                    placeholder="Enter mileage"
                   />
                 </div>
 
@@ -545,7 +611,8 @@ export default function NewReceipt() {
                     type="number"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.overMileage}
-                    onChange={(e) => setFormData({...formData, overMileage: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({...formData, overMileage: e.target.value})}
+                    placeholder="Enter mileage"
                   />
                 </div>
 
@@ -555,7 +622,8 @@ export default function NewReceipt() {
                     type="number"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.newMileage}
-                    onChange={(e) => setFormData({...formData, newMileage: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({...formData, newMileage: e.target.value})}
+                    placeholder="Enter mileage"
                   />
                 </div>
 
@@ -565,7 +633,8 @@ export default function NewReceipt() {
                     type="number"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.newRunning}
-                    onChange={(e) => setFormData({...formData, newRunning: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({...formData, newRunning: e.target.value})}
+                    placeholder="Enter running"
                   />
                 </div>
 
@@ -575,7 +644,8 @@ export default function NewReceipt() {
                     type="number"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                     value={formData.afterChange}
-                    onChange={(e) => setFormData({...formData, afterChange: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({...formData, afterChange: e.target.value})}
+                    placeholder="Enter value"
                   />
                 </div>
               </div>
@@ -653,19 +723,19 @@ export default function NewReceipt() {
             </table>
 
             <div className="space-y-1 text-sm mb-4">
-              {formData.usedMileage > 0 && (
+              {formData.usedMileage && (
                 <div className="flex justify-between">
                   <span>Used Mileage:</span>
                   <span>{formData.usedMileage}</span>
                 </div>
               )}
-              {formData.overMileage > 0 && (
+              {formData.overMileage && (
                 <div className="flex justify-between">
                   <span>Over Mileage:</span>
                   <span>{formData.overMileage}</span>
                 </div>
               )}
-              {formData.newMileage > 0 && (
+              {formData.newMileage && (
                 <div className="flex justify-between">
                   <span>New Mileage:</span>
                   <span>{formData.newMileage}</span>

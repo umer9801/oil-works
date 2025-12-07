@@ -18,12 +18,12 @@ export default function Stock() {
   const [activeTab, setActiveTab] = useState('oil');
   const [formData, setFormData] = useState({
     itemName: '',
-    quantity: 0,
-    costPrice: 0,
-    salePrice: 0,
+    quantity: '',
+    costPrice: '',
+    salePrice: '',
     category: 'oil',
-    litresPerGallon: 0,
-    pricePerLitre: 0
+    litresPerGallon: '',
+    pricePerLitre: ''
   });
   const [editForm, setEditForm] = useState({
     itemName: '',
@@ -58,9 +58,14 @@ export default function Stock() {
     e.preventDefault();
     setLoading(true);
     try {
-      // For oil, initialize with 0 remaining litres (all gallons are full/sealed)
+      // Convert string values to numbers and initialize
       const submitData = {
         ...formData,
+        quantity: parseFloat(formData.quantity as string) || 0,
+        costPrice: parseFloat(formData.costPrice as string) || 0,
+        salePrice: parseFloat(formData.salePrice as string) || 0,
+        litresPerGallon: parseFloat(formData.litresPerGallon as string) || 0,
+        pricePerLitre: parseFloat(formData.pricePerLitre as string) || 0,
         remainingLitresInCurrentGallon: 0
       };
 
@@ -74,7 +79,7 @@ export default function Stock() {
       if (res.ok && data.success) {
         showToast('Stock added successfully!', 'success');
         setShowForm(false);
-        setFormData({ itemName: '', quantity: 0, costPrice: 0, salePrice: 0, category: activeTab, litresPerGallon: 0, pricePerLitre: 0 });
+        setFormData({ itemName: '', quantity: '', costPrice: '', salePrice: '', category: activeTab, litresPerGallon: '', pricePerLitre: '' });
         fetchStock();
       } else {
         showToast(data.error || 'Failed to add stock', 'error');
@@ -278,10 +283,11 @@ export default function Stock() {
                     <input
                       type="number"
                       required
-                      min="0"
+                      min="1"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       value={formData.quantity}
-                      onChange={(e) => setFormData({...formData, quantity: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setFormData({...formData, quantity: e.target.value})}
+                      placeholder="Enter quantity"
                     />
                   </div>
                   {activeTab === 'oil' && (
@@ -291,11 +297,11 @@ export default function Stock() {
                         <input
                           type="number"
                           required
-                          min="0"
+                          min="0.1"
                           step="0.1"
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                           value={formData.litresPerGallon}
-                          onChange={(e) => setFormData({...formData, litresPerGallon: parseFloat(e.target.value) || 0})}
+                          onChange={(e) => setFormData({...formData, litresPerGallon: e.target.value})}
                           placeholder="e.g., 4.5"
                         />
                       </div>
@@ -304,10 +310,11 @@ export default function Stock() {
                         <input
                           type="number"
                           required
-                          min="0"
+                          min="1"
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                           value={formData.pricePerLitre}
-                          onChange={(e) => setFormData({...formData, pricePerLitre: parseInt(e.target.value) || 0})}
+                          onChange={(e) => setFormData({...formData, pricePerLitre: e.target.value})}
+                          placeholder="Enter price per litre"
                         />
                       </div>
                     </>
@@ -320,7 +327,8 @@ export default function Stock() {
                       min="0"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       value={formData.costPrice}
-                      onChange={(e) => setFormData({...formData, costPrice: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
+                      placeholder="Enter cost price"
                     />
                   </div>
                   <div>
@@ -330,17 +338,18 @@ export default function Stock() {
                     <input
                       type="number"
                       required
-                      min="0"
+                      min="1"
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       value={formData.salePrice}
-                      onChange={(e) => setFormData({...formData, salePrice: parseInt(e.target.value) || 0})}
+                      onChange={(e) => setFormData({...formData, salePrice: e.target.value})}
+                      placeholder="Enter sale price"
                     />
                   </div>
                 </div>
-                {activeTab === 'oil' && formData.quantity > 0 && formData.litresPerGallon > 0 && (
+                {activeTab === 'oil' && formData.quantity && formData.litresPerGallon && (
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      <strong>Total Stock:</strong> {formData.quantity} gallons ({formData.quantity * formData.litresPerGallon} litres total)
+                      <strong>Total Stock:</strong> {formData.quantity} gallons ({parseFloat(formData.quantity as string) * parseFloat(formData.litresPerGallon as string)} litres total)
                     </p>
                     <p className="text-sm text-blue-800 mt-1">
                       <strong>Pricing:</strong> Rs. {formData.pricePerLitre}/litre or Rs. {formData.salePrice}/gallon
