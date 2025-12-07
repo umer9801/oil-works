@@ -5,7 +5,7 @@ const CustomerSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   vehicleNo: { type: String, required: true },
   model: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now, expires: 2592000 } // 30 days
+  createdAt: { type: Date, default: Date.now } // Data stored forever
 });
 
 // Add indexes for better query performance

@@ -25,7 +25,7 @@ const ReceiptSchema = new mongoose.Schema({
   afterChange: Number,
   subtotal: Number,
   totalAmount: Number,
-  createdAt: { type: Date, default: Date.now, expires: 2592000 }
+  createdAt: { type: Date, default: Date.now } // Data stored forever
 });
 
 // Add indexes for better query performance
