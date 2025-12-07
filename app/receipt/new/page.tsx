@@ -539,48 +539,61 @@ export default function NewReceipt() {
                         </tr>
                       </thead>
                       <tbody>
-                        {items.map((item) => (
-                          <tr key={item.itemId} className="border-b">
-                            <td className="px-4 py-2">
-                              {item.itemName}
-                              {item.category === 'oil' && <span className="text-xs text-gray-500"> (Oil)</span>}
-                            </td>
-                            <td className="px-4 py-2 text-center">
-                              {item.category === 'oil' ? (
-                                <input
-                                  type="number"
-                                  min="0.1"
-                                  step="0.1"
-                                  className="w-20 px-2 py-1 border rounded text-center"
-                                  value={item.litres || 0}
-                                  onChange={(e) => handleLitresChange(item.itemId, parseFloat(e.target.value) || 0)}
-                                />
-                              ) : (
-                                <input
-                                  type="number"
-                                  min="1"
-                                  className="w-20 px-2 py-1 border rounded text-center"
-                                  value={item.quantity}
-                                  onChange={(e) => handleQuantityChange(item.itemId, parseInt(e.target.value) || 1)}
-                                />
-                              )}
-                              {item.category === 'oil' && <span className="text-xs ml-1">L</span>}
-                            </td>
-                            <td className="px-4 py-2 text-right">
-                              Rs. {item.category === 'oil' ? (item.price / (item.litres || 1)).toFixed(2) + '/L' : item.price}
-                            </td>
-                            <td className="px-4 py-2 text-right font-bold">Rs. {item.total.toFixed(2)}</td>
-                            <td className="px-4 py-2 text-center">
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveItem(item.itemId)}
-                                className="text-red-600 hover:text-red-800"
-                              >
-                                ✕
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {items.map((item) => {
+                          const stockItem = stock.find((s: any) => s._id === item.itemId);
+                          const isFullGallon = item.category === 'oil' && item.litres === (stockItem as any)?.litresPerGallon;
+                          
+                          return (
+                            <tr key={item.itemId} className="border-b">
+                              <td className="px-4 py-2">
+                                {item.itemName}
+                                {item.category === 'oil' && <span className="text-xs text-gray-500"> (Oil)</span>}
+                              </td>
+                              <td className="px-4 py-2 text-center">
+                                {item.category === 'oil' ? (
+                                  isFullGallon ? (
+                                    <span className="font-bold text-blue-600">1 Gallon</span>
+                                  ) : (
+                                    <div className="flex items-center justify-center gap-1">
+                                      <input
+                                        type="number"
+                                        min="0.1"
+                                        step="0.1"
+                                        className="w-20 px-2 py-1 border rounded text-center"
+                                        value={item.litres || 0}
+                                        onChange={(e) => handleLitresChange(item.itemId, parseFloat(e.target.value) || 0)}
+                                      />
+                                      <span className="text-xs">L</span>
+                                    </div>
+                                  )
+                                ) : (
+                                  <input
+                                    type="number"
+                                    min="1"
+                                    className="w-20 px-2 py-1 border rounded text-center"
+                                    value={item.quantity}
+                                    onChange={(e) => handleQuantityChange(item.itemId, parseInt(e.target.value) || 1)}
+                                  />
+                                )}
+                              </td>
+                              <td className="px-4 py-2 text-right">
+                                {item.category === 'oil' ? (
+                                  isFullGallon ? `Rs. ${item.price}` : `Rs. ${(item.price / (item.litres || 1)).toFixed(0)}/L`
+                                ) : `Rs. ${item.price}`}
+                              </td>
+                              <td className="px-4 py-2 text-right font-bold">Rs. {item.total.toFixed(0)}</td>
+                              <td className="px-4 py-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveItem(item.itemId)}
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  ✕
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                         <tr className="bg-gray-50 font-bold">
                           <td colSpan={3} className="px-4 py-2 text-right">Subtotal:</td>
                           <td className="px-4 py-2 text-right text-green-600">Rs. {calculateSubtotal().toFixed(2)}</td>
@@ -706,19 +719,27 @@ export default function NewReceipt() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item, index) => (
-                  <tr key={index} className="border-b">
-                    <td className="py-1">
-                      {item.itemName}
-                      {item.category === 'oil' && item.litres && (
-                        <div className="text-xs text-gray-600">({item.litres}L)</div>
-                      )}
-                    </td>
-                    <td className="text-center py-1">{item.category === 'oil' ? `${item.litres}L` : item.quantity}</td>
-                    <td className="text-right py-1">{item.category === 'oil' ? (item.price / (item.litres || 1)).toFixed(0) : item.price}</td>
-                    <td className="text-right py-1">{item.total.toFixed(0)}</td>
-                  </tr>
-                ))}
+                {items.map((item, index) => {
+                  const stockItem = stock.find((s: any) => s._id === item.itemId);
+                  const isFullGallon = item.category === 'oil' && item.litres === (stockItem as any)?.litresPerGallon;
+                  
+                  return (
+                    <tr key={index} className="border-b">
+                      <td className="py-1">{item.itemName}</td>
+                      <td className="text-center py-1">
+                        {item.category === 'oil' ? (
+                          isFullGallon ? '1 Gallon' : `${item.litres}L`
+                        ) : item.quantity}
+                      </td>
+                      <td className="text-right py-1">
+                        {item.category === 'oil' ? (
+                          isFullGallon ? item.price : (item.price / (item.litres || 1)).toFixed(0)
+                        ) : item.price}
+                      </td>
+                      <td className="text-right py-1">{item.total.toFixed(0)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
 
