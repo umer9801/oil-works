@@ -1,10 +1,13 @@
 import mongoose from 'mongoose';
 
 const ReceiptItemSchema = new mongoose.Schema({
+  itemId: String,
   itemName: String,
+  category: String,
   quantity: Number,
+  litres: Number, // For oil items
+  price: Number,
   costPrice: Number,
-  salePrice: Number,
   total: Number
 }, { _id: false });
 

@@ -6,6 +6,10 @@ const StockSchema = new mongoose.Schema({
   costPrice: { type: Number, required: true },
   salePrice: { type: Number, required: true },
   category: { type: String, enum: ['oil', 'oil-filter', 'air-filter', 'ac-filter'], required: true },
+  // For oil category only
+  litresPerGallon: { type: Number, default: 0 }, // How many litres in one gallon
+  pricePerLitre: { type: Number, default: 0 }, // Price per litre for oil
+  totalLitres: { type: Number, default: 0 }, // Total litres available (quantity * litresPerGallon)
   updatedAt: { type: Date, default: Date.now }
 });
 

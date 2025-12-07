@@ -21,7 +21,38 @@ export async function POST(request: Request) {
     await dbConnect();
     const body = await request.json();
     console.log('Creating receipt:', body);
+    
+    // Create receipt
     const receipt = await Receipt.create(body);
+    
+    // Deduct stock for each item
+    if (body.items && Array.isArray(body.items)) {
+      const Stock = (await import('@/models/Stock')).default;
+      
+      for (const item of body.items) {
+        const stockItem = await Stock.findById(item.itemId);
+        if (stockItem) {
+          if (item.category === 'oil' && item.litres) {
+            // Deduct litres from oil stock
+            const newTotalLitres = (stockItem.totalLitres || 0) - item.litres;
+            const newQuantity = newTotalLitres / (stockItem.litresPerGallon || 1);
+            await Stock.findByIdAndUpdate(item.itemId, {
+              totalLitres: Math.max(0, newTotalLitres),
+              quantity: Math.max(0, newQuantity),
+              updatedAt: new Date()
+            });
+          } else {
+            // Deduct quantity for filters
+            const newQuantity = (stockItem.quantity || 0) - (item.quantity || 0);
+            await Stock.findByIdAndUpdate(item.itemId, {
+              quantity: Math.max(0, newQuantity),
+              updatedAt: new Date()
+            });
+          }
+        }
+      }
+    }
+    
     return NextResponse.json({ success: true, receipt }, { status: 201 });
   } catch (error: any) {
     console.error('Failed to create receipt:', error);
