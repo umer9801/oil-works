@@ -106,13 +106,8 @@ export default function NewReceipt() {
     const stockItem = stock.find((s: any) => s._id === stockId);
     if (!stockItem) return;
 
-    // Check if item already exists
-    const existingItem = items.find(item => item.itemId === stockId);
-    if (existingItem) {
-      showToast('Item already added! Update quantity if needed.', 'info');
-      e.target.value = '';
-      return;
-    }
+    // Allow multiple entries of same item (for oil: can add gallon + litres separately)
+    // No duplicate check - user can add same item multiple times
 
     // If it's oil, show litre selection modal
     if ((stockItem as any).category === 'oil') {
@@ -672,50 +667,50 @@ export default function NewReceipt() {
             </form>
           </div>
 
-          {/* Print Receipt */}
-          <div ref={printRef} className="print-only bg-white p-8 max-w-md mx-auto">
-            <div className="text-center mb-6">
+          {/* Print Receipt - Compact for 1 Page */}
+          <div ref={printRef} className="print-only bg-white p-4 max-w-sm mx-auto" style={{ fontSize: '11px' }}>
+            <div className="text-center mb-3">
               <img 
                 src="/logo.jpeg" 
                 alt="The Oil Works Logo" 
-                className="mx-auto mb-3"
-                style={{ maxWidth: '120px', height: 'auto' }}
+                className="mx-auto mb-2"
+                style={{ maxWidth: '60px', height: 'auto' }}
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
-              <h1 className="text-3xl font-bold">THE OIL WORKS</h1>
-              <p className="text-sm text-gray-600">Oil Changing Service</p>
-              <p className="text-xs text-gray-500 mt-1">{new Date().toLocaleDateString()}</p>
+              <h1 className="text-xl font-bold">THE OIL WORKS</h1>
+              <p className="text-xs">Oil Changing Service</p>
+              <p className="text-xs mt-1">{new Date().toLocaleDateString()}</p>
             </div>
 
-            <div className="space-y-2 text-sm mb-4">
-              <div className="flex justify-between border-b pb-1">
+            <div className="space-y-1 text-xs mb-3">
+              <div className="flex justify-between border-b pb-0.5">
                 <span className="font-medium">Customer:</span>
                 <span>{formData.customerName}</span>
               </div>
-              <div className="flex justify-between border-b pb-1">
+              <div className="flex justify-between border-b pb-0.5">
                 <span className="font-medium">Phone:</span>
                 <span>{formData.customerPhone}</span>
               </div>
-              <div className="flex justify-between border-b pb-1">
+              <div className="flex justify-between border-b pb-0.5">
                 <span className="font-medium">Vehicle:</span>
                 <span>{formData.vehicleNo}</span>
               </div>
-              <div className="flex justify-between border-b pb-1">
+              <div className="flex justify-between border-b pb-0.5">
                 <span className="font-medium">Model:</span>
                 <span>{formData.model}</span>
               </div>
             </div>
 
-            {/* Items Table */}
-            <table className="w-full text-sm mb-4">
-              <thead className="border-b-2 border-black">
+            {/* Items Table - Compact */}
+            <table className="w-full text-xs mb-2">
+              <thead className="border-b border-black">
                 <tr>
-                  <th className="text-left py-1">Item</th>
-                  <th className="text-center py-1">Qty</th>
-                  <th className="text-right py-1">Price</th>
-                  <th className="text-right py-1">Total</th>
+                  <th className="text-left py-0.5">Item</th>
+                  <th className="text-center py-0.5">Qty</th>
+                  <th className="text-right py-0.5">Price</th>
+                  <th className="text-right py-0.5">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -724,57 +719,60 @@ export default function NewReceipt() {
                   const isFullGallon = item.category === 'oil' && item.litres === (stockItem as any)?.litresPerGallon;
                   
                   return (
-                    <tr key={index} className="border-b">
-                      <td className="py-1">{item.itemName}</td>
-                      <td className="text-center py-1">
+                    <tr key={index} className="border-b border-gray-300">
+                      <td className="py-0.5 text-xs">{item.itemName}</td>
+                      <td className="text-center py-0.5 text-xs">
                         {item.category === 'oil' ? (
-                          isFullGallon ? '1 Gallon' : `${item.litres}L`
+                          isFullGallon ? '1G' : `${item.litres}L`
                         ) : item.quantity}
                       </td>
-                      <td className="text-right py-1">
+                      <td className="text-right py-0.5 text-xs">
                         {item.category === 'oil' ? (
                           isFullGallon ? item.price : (item.price / (item.litres || 1)).toFixed(0)
                         ) : item.price}
                       </td>
-                      <td className="text-right py-1">{item.total.toFixed(0)}</td>
+                      <td className="text-right py-0.5 text-xs">{item.total.toFixed(0)}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
 
-            <div className="space-y-1 text-sm mb-4">
-              {formData.usedMileage && (
-                <div className="flex justify-between">
-                  <span>Used Mileage:</span>
-                  <span>{formData.usedMileage}</span>
-                </div>
-              )}
-              {formData.overMileage && (
-                <div className="flex justify-between">
-                  <span>Over Mileage:</span>
-                  <span>{formData.overMileage}</span>
-                </div>
-              )}
-              {formData.newMileage && (
-                <div className="flex justify-between">
-                  <span>New Mileage:</span>
-                  <span>{formData.newMileage}</span>
-                </div>
-              )}
-            </div>
+            {/* Mileage - Compact */}
+            {(formData.usedMileage || formData.overMileage || formData.newMileage) && (
+              <div className="space-y-0.5 text-xs mb-2 border-t border-gray-300 pt-1">
+                {formData.usedMileage && (
+                  <div className="flex justify-between">
+                    <span>Used:</span>
+                    <span>{formData.usedMileage}</span>
+                  </div>
+                )}
+                {formData.overMileage && (
+                  <div className="flex justify-between">
+                    <span>Over:</span>
+                    <span>{formData.overMileage}</span>
+                  </div>
+                )}
+                {formData.newMileage && (
+                  <div className="flex justify-between">
+                    <span>New:</span>
+                    <span>{formData.newMileage}</span>
+                  </div>
+                )}
+              </div>
+            )}
 
-            <div className="border-t-2 border-black pt-2 mb-4">
-              <div className="flex justify-between text-lg font-bold">
+            <div className="border-t-2 border-black pt-1 mb-2">
+              <div className="flex justify-between text-base font-bold">
                 <span>TOTAL:</span>
                 <span>Rs. {calculateSubtotal().toFixed(0)}</span>
               </div>
             </div>
 
-            <div className="text-center mt-6">
-              <p className="font-medium">Thanks For Choosing</p>
-              <p className="text-xl font-bold">THE OIL WORKS</p>
-              <p className="text-sm mt-2">For Information Call: 03XX-XXXXXXX</p>
+            <div className="text-center mt-3">
+              <p className="text-xs font-medium">Thanks For Choosing</p>
+              <p className="text-sm font-bold">THE OIL WORKS</p>
+              <p className="text-xs mt-1">Call: 03XX-XXXXXXX</p>
             </div>
           </div>
         </div>
