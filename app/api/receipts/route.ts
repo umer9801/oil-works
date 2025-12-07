@@ -34,11 +34,43 @@ export async function POST(request: Request) {
         if (stockItem) {
           if (item.category === 'oil' && item.litres) {
             // Deduct litres from oil stock
-            const newTotalLitres = (stockItem.totalLitres || 0) - item.litres;
-            const newQuantity = newTotalLitres / (stockItem.litresPerGallon || 1);
+            let litresNeeded = item.litres;
+            let currentGallons = stockItem.quantity || 0;
+            let remainingInCurrent = stockItem.remainingLitresInCurrentGallon || 0;
+            const litresPerGallon = stockItem.litresPerGallon || 1;
+
+            // First, use remaining litres from open gallon
+            if (remainingInCurrent > 0) {
+              if (litresNeeded <= remainingInCurrent) {
+                // Enough in open gallon
+                remainingInCurrent -= litresNeeded;
+                litresNeeded = 0;
+              } else {
+                // Use all from open gallon, need more
+                litresNeeded -= remainingInCurrent;
+                remainingInCurrent = 0;
+              }
+            }
+
+            // If still need more litres, open new gallon(s)
+            while (litresNeeded > 0 && currentGallons > 0) {
+              currentGallons -= 1; // Open a new gallon
+              remainingInCurrent = litresPerGallon; // Full gallon
+
+              if (litresNeeded >= litresPerGallon) {
+                // Need full gallon or more
+                litresNeeded -= litresPerGallon;
+                remainingInCurrent = 0;
+              } else {
+                // Need partial gallon
+                remainingInCurrent -= litresNeeded;
+                litresNeeded = 0;
+              }
+            }
+
             await Stock.findByIdAndUpdate(item.itemId, {
-              totalLitres: Math.max(0, newTotalLitres),
-              quantity: Math.max(0, newQuantity),
+              quantity: Math.max(0, currentGallons),
+              remainingLitresInCurrentGallon: remainingInCurrent,
               updatedAt: new Date()
             });
           } else {

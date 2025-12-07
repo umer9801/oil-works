@@ -58,10 +58,10 @@ export default function Stock() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Calculate total litres for oil category
+      // For oil, initialize with 0 remaining litres (all gallons are full/sealed)
       const submitData = {
         ...formData,
-        totalLitres: formData.category === 'oil' ? formData.quantity * formData.litresPerGallon : 0
+        remainingLitresInCurrentGallon: 0
       };
 
       const res = await fetch('/api/stock', {
@@ -104,8 +104,7 @@ export default function Stock() {
     try {
       const updateData = {
         id,
-        ...editForm,
-        totalLitres: editForm.category === 'oil' ? editForm.quantity * editForm.litresPerGallon : 0
+        ...editForm
       };
 
       const res = await fetch('/api/stock', {
@@ -270,19 +269,32 @@ export default function Stock() {
                     />
                   </div>
                   {activeTab === 'oil' && (
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">Litres per Gallon *</label>
-                      <input
-                        type="number"
-                        required
-                        min="0"
-                        step="0.1"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        value={formData.litresPerGallon}
-                        onChange={(e) => setFormData({...formData, litresPerGallon: parseFloat(e.target.value) || 0})}
-                        placeholder="e.g., 4.5"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label className="block text-gray-700 font-medium mb-2">Litres per Gallon *</label>
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          step="0.1"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          value={formData.litresPerGallon}
+                          onChange={(e) => setFormData({...formData, litresPerGallon: parseFloat(e.target.value) || 0})}
+                          placeholder="e.g., 4.5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-gray-700 font-medium mb-2">Price per Litre (Rs.) *</label>
+                        <input
+                          type="number"
+                          required
+                          min="0"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          value={formData.pricePerLitre}
+                          onChange={(e) => setFormData({...formData, pricePerLitre: parseInt(e.target.value) || 0})}
+                        />
+                      </div>
+                    </>
                   )}
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">Cost Price (Rs.) *</label>
@@ -297,7 +309,7 @@ export default function Stock() {
                   </div>
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">
-                      {activeTab === 'oil' ? 'Sale Price per Gallon (Rs.) *' : 'Sale Price (Rs.) *'}
+                      {activeTab === 'oil' ? 'Full Gallon Price (Rs.) *' : 'Sale Price (Rs.) *'}
                     </label>
                     <input
                       type="number"
@@ -308,25 +320,14 @@ export default function Stock() {
                       onChange={(e) => setFormData({...formData, salePrice: parseInt(e.target.value) || 0})}
                     />
                   </div>
-                  {activeTab === 'oil' && (
-                    <div>
-                      <label className="block text-gray-700 font-medium mb-2">Price per Litre (Rs.) *</label>
-                      <input
-                        type="number"
-                        required
-                        min="0"
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        value={formData.pricePerLitre}
-                        onChange={(e) => setFormData({...formData, pricePerLitre: parseInt(e.target.value) || 0})}
-                      />
-                    </div>
-                  )}
                 </div>
                 {activeTab === 'oil' && formData.quantity > 0 && formData.litresPerGallon > 0 && (
                   <div className="bg-blue-50 p-3 rounded-lg">
                     <p className="text-sm text-blue-800">
-                      <strong>Total Litres:</strong> {formData.quantity * formData.litresPerGallon} L
-                      ({formData.quantity} gallons × {formData.litresPerGallon} L/gallon)
+                      <strong>Total Stock:</strong> {formData.quantity} gallons ({formData.quantity * formData.litresPerGallon} litres total)
+                    </p>
+                    <p className="text-sm text-blue-800 mt-1">
+                      <strong>Pricing:</strong> Rs. {formData.pricePerLitre}/litre or Rs. {formData.salePrice}/gallon
                     </p>
                   </div>
                 )}
@@ -350,16 +351,21 @@ export default function Stock() {
                       <>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Gallons</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">L/Gallon</th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Total Litres</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Open Gallon</th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Price/L</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Gallon Price</th>
                       </>
                     )}
                     {activeTab !== 'oil' && (
                       <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Quantity</th>
                     )}
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Cost</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Sale Price</th>
-                    <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Profit</th>
+                    {activeTab !== 'oil' && (
+                      <>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Cost</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Sale Price</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Profit</th>
+                      </>
+                    )}
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Status</th>
                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
                   </tr>
@@ -370,22 +376,27 @@ export default function Stock() {
                       <td className="px-4 py-3 text-sm font-medium">{item.itemName}</td>
                       {activeTab === 'oil' && (
                         <>
-                          <td className="px-4 py-3 text-sm">{item.quantity}</td>
-                          <td className="px-4 py-3 text-sm">{item.litresPerGallon || 0}</td>
-                          <td className="px-4 py-3 text-sm font-bold text-purple-600">
-                            {item.totalLitres || 0} L
+                          <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
+                          <td className="px-4 py-3 text-sm">{item.litresPerGallon || 0}L</td>
+                          <td className="px-4 py-3 text-sm text-purple-600">
+                            {item.remainingLitresInCurrentGallon > 0 
+                              ? `${item.remainingLitresInCurrentGallon.toFixed(1)}L remaining` 
+                              : 'Full gallons only'}
                           </td>
                           <td className="px-4 py-3 text-sm">Rs. {item.pricePerLitre || 0}</td>
+                          <td className="px-4 py-3 text-sm">Rs. {item.salePrice || 0}</td>
                         </>
                       )}
                       {activeTab !== 'oil' && (
-                        <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
+                        <>
+                          <td className="px-4 py-3 text-sm font-bold">{item.quantity}</td>
+                          <td className="px-4 py-3 text-sm">Rs. {item.costPrice || 0}</td>
+                          <td className="px-4 py-3 text-sm font-bold text-green-600">Rs. {item.salePrice || 0}</td>
+                          <td className="px-4 py-3 text-sm font-bold text-blue-600">
+                            Rs. {(item.salePrice || 0) - (item.costPrice || 0)}
+                          </td>
+                        </>
                       )}
-                      <td className="px-4 py-3 text-sm">Rs. {item.costPrice || 0}</td>
-                      <td className="px-4 py-3 text-sm font-bold text-green-600">Rs. {item.salePrice || 0}</td>
-                      <td className="px-4 py-3 text-sm font-bold text-blue-600">
-                        Rs. {(item.salePrice || 0) - (item.costPrice || 0)}
-                      </td>
                       <td className="px-4 py-3 text-sm">
                         {item.quantity <= 5 ? (
                           <span className="text-red-600 font-medium">⚠️ Low</span>

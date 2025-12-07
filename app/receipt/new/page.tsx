@@ -141,14 +141,21 @@ export default function NewReceipt() {
   const handleAddOilWithLitres = () => {
     if (!selectedOilItem || oilLitres <= 0) return;
 
-    const totalLitresAvailable = selectedOilItem.totalLitres || 0;
-    if (oilLitres > totalLitresAvailable) {
-      showToast(`Only ${totalLitresAvailable} litres available!`, 'error');
+    const totalAvailableLitres = (selectedOilItem.quantity * selectedOilItem.litresPerGallon) + (selectedOilItem.remainingLitresInCurrentGallon || 0);
+    
+    if (oilLitres > totalAvailableLitres) {
+      showToast(`Only ${totalAvailableLitres.toFixed(1)} litres available!`, 'error');
       return;
     }
 
     const pricePerLitre = selectedOilItem.pricePerLitre || 0;
-    const totalPrice = oilLitres * pricePerLitre;
+    const litresPerGallon = selectedOilItem.litresPerGallon || 1;
+    
+    // Check if customer wants full gallon(s)
+    const isFullGallon = oilLitres % litresPerGallon === 0;
+    const totalPrice = isFullGallon && oilLitres === litresPerGallon 
+      ? selectedOilItem.salePrice // Use gallon price for full gallon
+      : oilLitres * pricePerLitre; // Use per-litre price for partial
 
     const newItem: ReceiptItem = {
       itemId: selectedOilItem._id,
@@ -158,7 +165,7 @@ export default function NewReceipt() {
       litres: oilLitres,
       price: totalPrice,
       total: totalPrice,
-      costPrice: (selectedOilItem.costPrice / selectedOilItem.litresPerGallon) * oilLitres
+      costPrice: (selectedOilItem.costPrice / litresPerGallon) * oilLitres
     };
 
     setItems([...items, newItem]);
@@ -259,23 +266,35 @@ export default function NewReceipt() {
                 <strong>{selectedOilItem.itemName}</strong>
               </p>
               <p className="text-sm text-gray-600 mb-2">
-                Available: {selectedOilItem.totalLitres || 0} litres
+                Available: {selectedOilItem.quantity} gallons 
+                {selectedOilItem.remainingLitresInCurrentGallon > 0 && 
+                  ` + ${selectedOilItem.remainingLitresInCurrentGallon.toFixed(1)}L (open gallon)`
+                }
               </p>
-              <p className="text-sm text-gray-600 mb-4">
-                Price: Rs. {selectedOilItem.pricePerLitre} per litre
+              <p className="text-sm text-gray-600 mb-2">
+                Price: Rs. {selectedOilItem.pricePerLitre}/litre or Rs. {selectedOilItem.salePrice}/gallon
+              </p>
+              <p className="text-xs text-gray-500 mb-4">
+                ({selectedOilItem.litresPerGallon}L per gallon)
               </p>
               <label className="block text-gray-700 font-medium mb-2">Litres Needed</label>
               <input
                 type="number"
                 min="0.1"
                 step="0.1"
-                max={selectedOilItem.totalLitres || 0}
+                max={(selectedOilItem.quantity * selectedOilItem.litresPerGallon) + (selectedOilItem.remainingLitresInCurrentGallon || 0)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 value={oilLitres}
                 onChange={(e) => setOilLitres(parseFloat(e.target.value) || 0)}
               />
               <p className="text-sm text-green-600 mt-2 font-bold">
-                Total: Rs. {(oilLitres * (selectedOilItem.pricePerLitre || 0)).toFixed(2)}
+                Total: Rs. {
+                  (oilLitres === selectedOilItem.litresPerGallon 
+                    ? selectedOilItem.salePrice 
+                    : oilLitres * (selectedOilItem.pricePerLitre || 0)
+                  ).toFixed(2)
+                }
+                {oilLitres === selectedOilItem.litresPerGallon && ' (Full Gallon Price)'}
               </p>
             </div>
             <div className="flex gap-2">
@@ -384,11 +403,14 @@ export default function NewReceipt() {
                       onChange={handleAddItem}
                     >
                       <option value="">-- Select Oil --</option>
-                      {getStockByCategory('oil').map((item: any) => (
-                        <option key={item._id} value={item._id}>
-                          {item.itemName} - {item.totalLitres}L available - Rs. {item.pricePerLitre}/L
-                        </option>
-                      ))}
+                      {getStockByCategory('oil').map((item: any) => {
+                        const totalAvailableLitres = (item.quantity * item.litresPerGallon) + (item.remainingLitresInCurrentGallon || 0);
+                        return (
+                          <option key={item._id} value={item._id}>
+                            {item.itemName} - {item.quantity} gallons + {(item.remainingLitresInCurrentGallon || 0).toFixed(1)}L - Rs. {item.pricePerLitre}/L
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
 

@@ -2,18 +2,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Dashboard() {
   const router = useRouter();
   const [lowStockItems, setLowStockItems] = useState<any[]>([]);
-  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
-    // Check if we're in the browser
     if (typeof window === 'undefined') return;
 
-    // Check authentication (cookie or localStorage)
     const cookieAuth = document.cookie.includes('oil_works_auth=true');
     const localAuth = localStorage.getItem('isLoggedIn') === 'true';
     const isLoggedIn = cookieAuth || localAuth;
@@ -23,10 +19,7 @@ export default function Dashboard() {
       return;
     }
 
-    // Fetch stock and check for low items
     fetchLowStock();
-    
-    // Check every 30 seconds
     const interval = setInterval(fetchLowStock, 30000);
     return () => clearInterval(interval);
   }, [router]);
@@ -37,10 +30,6 @@ export default function Dashboard() {
       const data = await res.json();
       const lowItems = data.filter((item: any) => item.quantity <= 5);
       setLowStockItems(lowItems);
-      
-      if (lowItems.length > 0) {
-        setShowNotification(true);
-      }
     } catch (error) {
       console.error('Failed to fetch stock:', error);
     }
@@ -48,166 +37,219 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     if (typeof window !== 'undefined') {
-      // Clear both cookie and localStorage
-      document.cookie = 'oil_works_auth=; max-age=0; path=/';
+      document.cookie = 'oil_works_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
       localStorage.removeItem('isLoggedIn');
+      router.push('/login');
     }
-    router.push('/login');
   };
 
+  const menuItems = [
+    {
+      title: 'New Receipt',
+      description: 'Create new customer receipt',
+      icon: '📝',
+      href: '/receipt/new',
+      color: 'from-green-500 to-emerald-600',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-700'
+    },
+    {
+      title: 'Receipts History',
+      description: 'View all receipts',
+      icon: '📋',
+      href: '/receipts',
+      color: 'from-blue-500 to-cyan-600',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-blue-700'
+    },
+    {
+      title: 'Stock Management',
+      description: 'Manage inventory',
+      icon: '📦',
+      href: '/stock',
+      color: 'from-purple-500 to-pink-600',
+      bgColor: 'bg-purple-50',
+      textColor: 'text-purple-700'
+    },
+    {
+      title: 'Customers',
+      description: 'Manage customers',
+      icon: '👥',
+      href: '/customers',
+      color: 'from-orange-500 to-red-600',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-orange-700'
+    },
+    {
+      title: 'Add Customer',
+      description: 'Register new customer',
+      icon: '➕',
+      href: '/customers/add',
+      color: 'from-teal-500 to-green-600',
+      bgColor: 'bg-teal-50',
+      textColor: 'text-teal-700'
+    },
+    {
+      title: 'Reports',
+      description: 'View profit & analytics',
+      icon: '📊',
+      href: '/reports',
+      color: 'from-indigo-500 to-purple-600',
+      bgColor: 'bg-indigo-50',
+      textColor: 'text-indigo-700'
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Low Stock Notification */}
-        {showNotification && lowStockItems.length > 0 && (
-          <div className="fixed top-4 right-4 z-50 bg-red-500 text-white px-6 py-4 rounded-lg shadow-2xl max-w-md animate-bounce">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-bold text-lg mb-2">⚠️ Low Stock Alert!</h3>
-                <p className="text-sm mb-2">{lowStockItems.length} item(s) need restocking:</p>
-                <ul className="text-sm space-y-1">
-                  {lowStockItems.slice(0, 3).map((item: any) => (
-                    <li key={item._id}>• {item.itemName} ({item.quantity} left)</li>
-                  ))}
-                </ul>
-                <Link href="/stock" className="text-sm underline mt-2 inline-block">
-                  View Stock →
-                </Link>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-lg border-b border-white/20 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2.5 rounded-xl shadow-lg">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
               </div>
-              <button 
-                onClick={() => setShowNotification(false)}
-                className="text-white hover:text-gray-200 text-2xl leading-none"
-              >
-                ×
-              </button>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  The Oil Works
+                </h1>
+                <p className="text-blue-200 text-xs md:text-sm">Professional POS System</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500/90 backdrop-blur-sm text-white px-4 md:px-6 py-2 md:py-3 rounded-xl hover:bg-red-600 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 text-sm md:text-base"
+            >
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="hidden md:inline">Logout</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        {/* Low Stock Alert */}
+        {lowStockItems.length > 0 && (
+          <div className="mb-8 bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm border border-red-500/30 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-start gap-4">
+              <div className="bg-red-500 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-white mb-2">⚠️ Low Stock Alert</h3>
+                <p className="text-red-100 mb-3">
+                  {lowStockItems.length} item(s) are running low (≤5 units)
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {lowStockItems.slice(0, 5).map((item: any) => (
+                    <span key={item._id} className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-sm text-white border border-white/30">
+                      {item.itemName} ({item.quantity} left)
+                    </span>
+                  ))}
+                  {lowStockItems.length > 5 && (
+                    <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg text-sm text-white border border-white/30">
+                      +{lowStockItems.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 md:mb-12 gap-4">
-          <div className="text-center md:text-left flex items-center gap-4">
-            <Image 
-              src="/logo.jpeg" 
-              alt="Logo" 
-              width={80} 
-              height={80}
-              className="rounded-full"
-            />
-            <div>
-              <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">
-                THE OIL WORKS
-              </h1>
-              <p className="text-gray-400 text-sm md:text-base">Point of Sale System</p>
-            </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Logout
-          </button>
+        {/* Welcome Section */}
+        <div className="mb-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+            Welcome Back! 👋
+          </h2>
+          <p className="text-blue-200 text-lg">
+            Select an option below to get started
+          </p>
         </div>
 
-        {/* Low Stock Warning Banner */}
-        {lowStockItems.length > 0 && (
-          <div className="bg-red-100 border-2 border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <strong className="font-bold">⚠️ Low Stock Alert:</strong>
-                <span className="ml-2">{lowStockItems.length} item(s) have 5 or less quantity!</span>
+        {/* Menu Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {menuItems.map((item, index) => (
+            <Link key={index} href={item.href}>
+              <div className="group bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 cursor-pointer">
+                <div className="flex items-start gap-4">
+                  <div className={`bg-gradient-to-br ${item.color} p-4 rounded-xl shadow-lg group-hover:scale-110 transition-transform`}>
+                    <span className="text-3xl">{item.icon}</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-blue-200 transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-300 text-sm">
+                      {item.description}
+                    </p>
+                  </div>
+                  <svg className="w-6 h-6 text-white/50 group-hover:text-white group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
               </div>
-              <Link href="/stock" className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 text-sm">
-                Check Stock
-              </Link>
+            </Link>
+          ))}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-green-500/20 to-emerald-600/20 backdrop-blur-lg border border-green-500/30 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="bg-green-500 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-green-100 text-sm">System Status</p>
+                <p className="text-white text-xl font-bold">Online</p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Main Menu Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* New Receipt */}
-          <Link href="/receipt/new">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                📝
+          <div className="bg-gradient-to-br from-blue-500/20 to-cyan-600/20 backdrop-blur-lg border border-blue-500/30 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="bg-blue-500 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                New Receipt
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">Create new service receipt</p>
+              <div>
+                <p className="text-blue-100 text-sm">Last Updated</p>
+                <p className="text-white text-xl font-bold">Just Now</p>
+              </div>
             </div>
-          </Link>
+          </div>
 
-          {/* Add Customer */}
-          <Link href="/customers/add">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                👤
+          <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 backdrop-blur-lg border border-purple-500/30 rounded-2xl p-6 shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="bg-purple-500 p-3 rounded-xl">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
               </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                Add Customer
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">Register new customer</p>
+              <div>
+                <p className="text-purple-100 text-sm">Performance</p>
+                <p className="text-white text-xl font-bold">Excellent</p>
+              </div>
             </div>
-          </Link>
+          </div>
+        </div>
 
-          {/* View Customers */}
-          <Link href="/customers">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                👥
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                Customers
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">View all customers</p>
-            </div>
-          </Link>
-
-          {/* Manage Stock */}
-          <Link href="/stock">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group relative">
-              {lowStockItems.length > 0 && (
-                <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                  {lowStockItems.length}
-                </div>
-              )}
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                📦
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                Manage Stock
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">Add & view inventory</p>
-            </div>
-          </Link>
-
-          {/* Receipts History */}
-          <Link href="/receipts">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                📋
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                Receipts
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">View all receipts</p>
-            </div>
-          </Link>
-
-          {/* Reports */}
-          <Link href="/reports">
-            <div className="bg-white rounded-xl p-6 md:p-8 shadow-lg hover:shadow-2xl transition-all cursor-pointer group">
-              <div className="text-5xl md:text-6xl mb-4 group-hover:scale-110 transition-transform">
-                📊
-              </div>
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                Reports
-              </h2>
-              <p className="text-gray-600 text-sm md:text-base">Profit/Loss analysis</p>
-            </div>
-          </Link>
+        {/* Footer */}
+        <div className="mt-12 text-center">
+          <p className="text-gray-400 text-sm">
+            © 2024 The Oil Works. All rights reserved.
+          </p>
         </div>
       </div>
     </div>
