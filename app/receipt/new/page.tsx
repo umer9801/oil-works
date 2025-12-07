@@ -560,6 +560,7 @@ export default function NewReceipt() {
                                         className="w-20 px-2 py-1 border rounded text-center"
                                         value={item.litres || 0}
                                         onChange={(e) => handleLitresChange(item.uniqueId, parseFloat(e.target.value) || 0)}
+                                        onFocus={(e) => e.target.select()}
                                       />
                                       <span className="text-xs">L</span>
                                     </div>
@@ -571,6 +572,7 @@ export default function NewReceipt() {
                                     className="w-20 px-2 py-1 border rounded text-center"
                                     value={item.quantity}
                                     onChange={(e) => handleQuantityChange(item.uniqueId, parseInt(e.target.value) || 1)}
+                                    onFocus={(e) => e.target.select()}
                                   />
                                 )}
                               </td>
