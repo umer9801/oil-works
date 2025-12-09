@@ -1,7 +1,24 @@
 @import "tailwindcss";
 
+/* Premium Theme Variables */
+:root {
+  --primary: #1e40af; /* Professional Blue */
+  --primary-dark: #1e3a8a;
+  --secondary: #0891b2; /* Cyan */
+  --success: #059669; /* Green */
+  --warning: #d97706; /* Amber */
+  --danger: #dc2626; /* Red */
+  --background: #f8fafc; /* Light Gray */
+  --surface: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border: #e2e8f0;
+}
+
 body {
-  background-color: rgb(249 250 251);
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
 .print-only {
@@ -94,22 +111,78 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Premium */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
+  background: #f1f5f9;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
-  border-radius: 10px;
+  background: #94a3b8;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #2563eb, #7c3aed);
+  background: #64748b;
+}
+
+/* Premium Button Styles */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-6 py-2.5 rounded-lg border border-gray-300 transition-all duration-200;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-lg shadow-sm hover:shadow-md transition-all duration-200;
+}
+
+/* Premium Card Styles */
+.card {
+  @apply bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200;
+}
+
+.card-body {
+  @apply px-6 py-4;
+}
+
+/* Premium Input Styles */
+.input-field {
+  @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200;
+}
+
+/* Premium Table Styles */
+.table-premium {
+  @apply w-full border-collapse;
+}
+
+.table-premium thead {
+  @apply bg-gray-50 border-b-2 border-gray-200;
+}
+
+.table-premium th {
+  @apply px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider;
+}
+
+.table-premium td {
+  @apply px-6 py-4 text-sm text-gray-900 border-b border-gray-100;
+}
+
+.table-premium tbody tr:hover {
+  @apply bg-gray-50;
 }
