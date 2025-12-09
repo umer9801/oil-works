@@ -17,14 +17,29 @@ export async function POST(request: Request) {
     await connectDB();
     const data = await request.json();
     
+    // Ensure required fields
+    if (!data.customerName || !data.customerPhone || !data.totalAmount) {
+      return NextResponse.json({ 
+        error: 'Customer name, phone, and total amount are required' 
+      }, { status: 400 });
+    }
+    
     const loan = await Loan.create({
-      ...data,
+      customerId: data.customerId || null,
+      customerName: data.customerName,
+      customerPhone: data.customerPhone,
+      vehicleNo: data.vehicleNo || '',
+      totalAmount: data.totalAmount,
+      paidAmount: 0,
       remainingAmount: data.totalAmount,
-      status: 'pending'
+      payments: [],
+      status: 'pending',
+      description: data.description || ''
     });
     
     return NextResponse.json({ success: true, loan });
   } catch (error: any) {
+    console.error('Loan creation error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

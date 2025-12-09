@@ -31,6 +31,7 @@ export default function NewReceipt() {
   const [showOilLitreModal, setShowOilLitreModal] = useState(false);
   const [selectedOilItem, setSelectedOilItem] = useState<any>(null);
   const [oilLitres, setOilLitres] = useState('');
+  const [addToLoan, setAddToLoan] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     customerPhone: '',
@@ -217,6 +218,7 @@ export default function NewReceipt() {
     const subtotal = calculateSubtotal();
     
     try {
+      // Create receipt
       const res = await fetch('/api/receipts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -231,7 +233,34 @@ export default function NewReceipt() {
       const data = await res.json();
       
       if (res.ok && data.success) {
-        showToast('Receipt created successfully!', 'success');
+        // If "Add to Loan" is checked, create or update loan
+        if (addToLoan) {
+          try {
+            const loanRes = await fetch('/api/loans', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                customerId: selectedCustomer?._id,
+                customerName: formData.customerName,
+                customerPhone: formData.customerPhone,
+                vehicleNo: formData.vehicleNo,
+                totalAmount: subtotal,
+                description: `Receipt items: ${items.map(i => i.itemName).join(', ')}`
+              })
+            });
+            const loanData = await loanRes.json();
+            
+            if (loanRes.ok && loanData.success) {
+              showToast('Receipt created and added to loan!', 'success');
+            } else {
+              showToast('Receipt created but loan failed: ' + loanData.error, 'error');
+            }
+          } catch (loanError: any) {
+            showToast('Receipt created but loan failed: ' + loanError.message, 'error');
+          }
+        } else {
+          showToast('Receipt created successfully!', 'success');
+        }
         setTimeout(() => handlePrint(), 500);
       } else {
         showToast(data.error || 'Failed to create receipt', 'error');
@@ -663,11 +692,31 @@ export default function NewReceipt() {
                 </div>
               </div>
 
+              {/* Add to Loan Option */}
+              <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg border-2 border-yellow-300">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={addToLoan}
+                    onChange={(e) => setAddToLoan(e.target.checked)}
+                    className="w-5 h-5 text-yellow-600 rounded focus:ring-2 focus:ring-yellow-500"
+                  />
+                  <div>
+                    <span className="text-gray-800 font-bold flex items-center gap-2">
+                      <span className="text-xl">💰</span> Add to Customer Loan
+                    </span>
+                    <p className="text-xs text-gray-600 mt-1">
+                      Customer will pay later. Amount will be added to their loan account.
+                    </p>
+                  </div>
+                </label>
+              </div>
+
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 text-lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-cyan-700 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                Create & Print Receipt
+                {addToLoan ? '💰 Create Receipt & Add to Loan' : '🖨️ Create & Print Receipt'}
               </button>
             </form>
           </div>
