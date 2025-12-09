@@ -65,6 +65,29 @@ export async function PUT(request: Request) {
   }
 }
 
+export async function PATCH(request: Request) {
+  try {
+    await connectDB();
+    const { id, totalAmount, remainingAmount, description, status } = await request.json();
+    
+    const loan = await Loan.findById(id);
+    if (!loan) {
+      return NextResponse.json({ error: 'Loan not found' }, { status: 404 });
+    }
+    
+    loan.totalAmount = totalAmount;
+    loan.remainingAmount = remainingAmount;
+    loan.description = description;
+    loan.status = status;
+    
+    await loan.save();
+    
+    return NextResponse.json({ success: true, loan });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(request: Request) {
   try {
     await connectDB();
