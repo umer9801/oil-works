@@ -97,6 +97,15 @@ export default function Dashboard() {
       color: 'from-indigo-500 to-purple-600',
       bgColor: 'bg-indigo-50',
       textColor: 'text-indigo-700'
+    },
+    {
+      title: 'Loans',
+      description: 'Manage customer loans',
+      icon: '💰',
+      href: '/loans',
+      color: 'from-yellow-500 to-orange-600',
+      bgColor: 'bg-yellow-50',
+      textColor: 'text-yellow-700'
     }
   ];
 
