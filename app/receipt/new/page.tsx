@@ -703,7 +703,7 @@ export default function NewReceipt() {
                   />
                   <div>
                     <span className="text-gray-800 font-bold flex items-center gap-2">
-                      <span className="text-xl">💰</span> Add to Customer Loan
+                      Add to Customer Loan
                     </span>
                     <p className="text-xs text-gray-600 mt-1">
                       Customer will pay later. Amount will be added to their loan account.
@@ -716,7 +716,7 @@ export default function NewReceipt() {
                 type="submit"
                 className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-cyan-700 text-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               >
-                {addToLoan ? '💰 Create Receipt & Add to Loan' : '🖨️ Create & Print Receipt'}
+                {addToLoan ? 'Create Receipt & Add to Loan' : 'Create & Print Receipt'}
               </button>
             </form>
           </div>

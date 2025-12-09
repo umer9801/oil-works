@@ -324,7 +324,7 @@ export default function Loans() {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-4 rounded-xl hover:from-purple-600 hover:to-pink-700 disabled:from-gray-400 disabled:to-gray-500 font-bold text-lg shadow-lg shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 hover:scale-105"
                 >
-                  {loading ? '⏳ Updating...' : '✓ Update Loan'}
+                  {loading ? 'Updating...' : 'Update Loan'}
                 </button>
                 <button
                   type="button"
@@ -401,7 +401,7 @@ export default function Loans() {
                   disabled={loading}
                   className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-4 rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 font-bold text-lg shadow-lg shadow-green-500/50 hover:shadow-green-500/70 transition-all duration-300 hover:scale-105"
                 >
-                  {loading ? '⏳ Adding...' : '✓ Add Payment'}
+                  {loading ? 'Adding...' : 'Add Payment'}
                 </button>
                 <button
                   type="button"
@@ -422,7 +422,7 @@ export default function Loans() {
 
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
-          <PageHeader title="💰 Loan Management" />
+          <PageHeader title="Loan Management" />
 
           {/* Stats Cards - Premium Design */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -616,7 +616,7 @@ export default function Loans() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-xl hover:from-green-600 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-bold text-lg shadow-lg shadow-green-500/50 hover:shadow-green-500/70 transition-all duration-300 hover:scale-105"
                 >
-                  {loading ? '⏳ Adding...' : '✓ Add Loan'}
+                  {loading ? 'Adding...' : 'Add Loan'}
                 </button>
               </form>
             )}
@@ -659,17 +659,17 @@ export default function Loans() {
                         <td className="px-6 py-4 text-center">
                           {loan.status === 'paid' && (
                             <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-green-500/50">
-                              ✓ Paid
+                              Paid
                             </span>
                           )}
                           {loan.status === 'partial' && (
                             <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-yellow-500/50">
-                              ⏳ Partial
+                              Partial
                             </span>
                           )}
                           {loan.status === 'pending' && (
                             <span className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg shadow-red-500/50">
-                              ⚠️ Pending
+                              Pending
                             </span>
                           )}
                         </td>
@@ -684,7 +684,7 @@ export default function Loans() {
                                 disabled={loading}
                                 className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:from-blue-600 hover:to-cyan-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105"
                               >
-                                💰
+                                Pay
                               </button>
                             )}
                             <button
@@ -692,14 +692,14 @@ export default function Loans() {
                               disabled={loading}
                               className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105"
                             >
-                              ✏️
+                              Edit
                             </button>
                             <button
                               onClick={() => handleDelete(loan._id, loan.customerName)}
                               disabled={loading}
                               className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:from-red-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg hover:shadow-red-500/50 transition-all duration-300 hover:scale-105"
                             >
-                              🗑️
+                              Delete
                             </button>
                           </div>
                         </td>
@@ -841,7 +841,7 @@ export default function Loans() {
                         disabled={loading}
                         className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl text-sm font-bold hover:from-blue-600 hover:to-cyan-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg transition-all duration-300"
                       >
-                        💰 Pay
+                        Pay
                       </button>
                     )}
                     <button
@@ -849,14 +849,14 @@ export default function Loans() {
                       disabled={loading}
                       className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl text-sm font-bold hover:from-purple-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg transition-all duration-300"
                     >
-                      ✏️
+                      Edit
                     </button>
                     <button
                       onClick={() => handleDelete(loan._id, loan.customerName)}
                       disabled={loading}
                       className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-4 py-3 rounded-xl text-sm font-bold hover:from-red-600 hover:to-pink-600 disabled:from-gray-400 disabled:to-gray-500 shadow-lg transition-all duration-300"
                     >
-                      🗑️
+                      Delete
                     </button>
                   </div>
                 </div>
