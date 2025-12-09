@@ -264,6 +264,49 @@ export default function Loans() {
   const stats = getTotalStats();
   const filteredLoans = getFilteredLoans();
 
+  const exportToExcel = () => {
+    // Create Excel data
+    const excelData = loans.map(loan => ({
+      'Customer Name': loan.customerName,
+      'Phone': loan.customerPhone,
+      'Vehicle': loan.vehicleNo || '-',
+      'Total Amount': loan.totalAmount,
+      'Paid Amount': loan.paidAmount,
+      'Remaining Amount': loan.remainingAmount,
+      'Status': loan.status.toUpperCase(),
+      'Description': loan.description || '-',
+      'Created Date': new Date(loan.createdAt).toLocaleDateString('en-PK'),
+      'Payments Count': loan.payments.length,
+      'Payment History': loan.payments.map(p => 
+        `Rs.${p.amount} on ${new Date(p.date).toLocaleDateString('en-PK')}${p.note ? ` (${p.note})` : ''}`
+      ).join(' | ')
+    }));
+
+    // Convert to CSV
+    const headers = Object.keys(excelData[0] || {});
+    const csvContent = [
+      headers.join(','),
+      ...excelData.map(row => 
+        headers.map(header => {
+          const value = row[header as keyof typeof row];
+          // Escape commas and quotes
+          return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        }).join(',')
+      )
+    ].join('\n');
+
+    // Download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `loans_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    
+    showToast('Loans exported successfully!', 'success');
+  };
+
   return (
     <>
       {toast.show && (
@@ -514,13 +557,22 @@ export default function Loans() {
                 </button>
               </div>
               
-              <button
-                onClick={() => setShowForm(!showForm)}
-                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 font-medium shadow-lg shadow-green-500/50 hover:shadow-green-500/70 transition-all duration-300 hover:scale-105 flex items-center gap-2"
-              >
-                <span className="text-xl">{showForm ? '✕' : '+'}</span>
-                {showForm ? 'Cancel' : 'Add Loan'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={exportToExcel}
+                  disabled={loans.length === 0}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white px-6 py-3 rounded-xl hover:from-blue-600 hover:to-cyan-700 font-medium shadow-lg shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 hover:scale-105 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Export Excel
+                </button>
+                <button
+                  onClick={() => setShowForm(!showForm)}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-3 rounded-xl hover:from-green-600 hover:to-emerald-700 font-medium shadow-lg shadow-green-500/50 hover:shadow-green-500/70 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                >
+                  <span className="text-xl">{showForm ? '✕' : '+'}</span>
+                  {showForm ? 'Cancel' : 'Add Loan'}
+                </button>
+              </div>
             </div>
 
             {/* Add Loan Form */}
